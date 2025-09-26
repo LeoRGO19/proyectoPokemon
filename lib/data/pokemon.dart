@@ -1,21 +1,18 @@
-// === Pokemon.dart ===
+// === pokemon.dart ===
 // Clase modelo para Pokémon: Almacena datos básicos.
 // Simple data class; extensible.
-// Para PokeAPI: Agregar más campos como List<String> types, String generation, String? spriteUrl, etc.
 
 class Pokemon {
-  final int id;
   final String name;
-  final int height; // En decímetros
-  final int weight; // En hectogramos
-  final String imagePath; // Ruta de la imagen local
+  final String url;
+  // Almacena el nombre del pokemon y su url.
+  Pokemon({required this.name, required this.url});
 
-  Pokemon({
-    required this.id,
-    required this.name,
-    required this.height,
-    required this.weight,
-    required this.imagePath,
-  });
-  // Faltante: Factory fromJson para parsear de PokeAPI (ej: Pokemon.fromJson(Map<String, dynamic> json)).
+  // Factory creada para recibir tanto el nombre como la url,con una verificacion de nulidad.
+  factory Pokemon.fromJson(Map<String, dynamic> json) {
+    if (json['name'] == null || json['url'] == null) {
+      throw Exception("Datos inválidos para crear un Pokémon");
+    }
+    return Pokemon(name: json['name'], url: json['url']);
+  }
 }
