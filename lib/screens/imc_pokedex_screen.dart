@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pokedex/core/text_styles.dart';
-import 'package:pokedex/data/lista_prueba.dart';
 import 'package:pokedex/components/pokedex_components/search_bar_widget.dart';
 import 'package:pokedex/components/pokedex_components/category_filter_widget.dart';
 import 'package:pokedex/components/pokedex_components/pokemon_card_list.dart';
+import 'package:pokedex/data/pokeapi.dart';
+import 'package:pokedex/data/pokemon.dart';
 
 // === ImcPokedexScreen.dart ===
 // Pantalla principal de la Pokedex: Muestra el buscador, filtros y lista de Pokémon.
@@ -18,8 +18,45 @@ class ImcPokedexScreen extends StatefulWidget {
 }
 
 class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
-  final ListaPrueba pokemons =
-      ListaPrueba(); // Instancia de datos de prueba; en PokeAPI, usar Future o Provider para datos dinámicos.
+  // Lista con todos los pokemons, se llenara con la llamada a featchAllPokemon.
+  List<Pokemon> _allPokemons = [];
+  // Lista con los filtrados, se ira actualizando dependiendo de las circunstancias.
+  List<Pokemon> _filteredPokemons = [];
+  bool _isLoading = true;
+  String _error = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPokemons();
+  }
+
+  // Uso de un Future para guardar los datos de manera practica
+  Future<void> _fetchPokemons() async {
+    try {
+      final pokemons = await PokeApi.fetchAllPokemon();
+      setState(() {
+        _allPokemons = pokemons;
+        _filteredPokemons = pokemons;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _filterPokemons(String query) {
+    final results = _allPokemons.where((pokemon) {
+      return pokemon.name.toLowerCase().startsWith(query.toLowerCase());
+    }).toList();
+
+    setState(() {
+      _filteredPokemons = results;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,30 +65,21 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
         title: const Text('Pokedex'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Column(
-        children: [
-          SearchBarWidget(
-            onChanged: (value) {
-              // Placeholder para filtrado futuro
-              print(
-                'Buscando: $value',
-              ); // Aquí iría la lógica real: setState con filtrado de pokemons por nombre.
-              // Faltante: Actualizar una lista filtrada, ej: _filteredPokemons = pokemons.pokemonList.where((p) => p.name.contains(value)).toList();
-              // Luego, pasar _filteredPokemons a PokemonCardList abajo.
-            },
-          ),
-          CategoryFilterWidget(), // Widget de filtros; faltante: Pasar callback onFilterChanged para actualizar filtrado por categorías.
-          // Ejemplo faltante: CategoryFilterWidget(onFilterChanged: (selected, mode) { setState(() { /* filtrar _filteredPokemons */ }); }),
-          Expanded(child: PokemonCardList(pokemons: pokemons)),
-          // Cambio con API: Pasar lista filtrada, ej: PokemonCardList(pokemons: _filteredPokemons ?? pokemons),
-          // Faltante: Indicador de loading (CircularProgressIndicator) mientras fetch de PokeAPI.
-        ],
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _error.isNotEmpty
+          ? Center(child: Text("Error: $_error"))
+          : Column(
+              children: [
+                // Aqui esta el onChanged que lee el texto en la barra de busqueda
+                SearchBarWidget(onChanged: (value) => _filterPokemons(value)),
+                CategoryFilterWidget(), // todavía no implementa lógica
+                Expanded(child: PokemonCardList(pokemons: _filteredPokemons)),
+              ],
+            ),
     );
   }
 }
