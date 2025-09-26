@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/core/text_styles.dart';
-import 'package:pokedex/data/lista_prueba.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/screens/imc_pokedex_screen.dart';
 
