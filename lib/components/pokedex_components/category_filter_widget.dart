@@ -1,192 +1,294 @@
+// components/pokedex_components/category_filter_widget.dart
 import 'package:flutter/material.dart';
+import 'package:pokedex/core/text_styles.dart';
+import 'package:pokedex/core/app_colors.dart';
 
-// === CategoryFilterWidget.dart ===
-// Widget para filtros por categorías: Panel expandible con checkboxes y modo OR/AND.
-// Permite seleccionar múltiples categorías organizadas en secciones; actualiza un set de selecciones.
-// Para PokeAPI: Construir sectionCategories dinámicamente desde API (ej: fetch tipos, generaciones); agregar callback para filtrado real.
+// Este widget permite seleccionar categorías para filtrar Pokémon, como generaciones, tipos, etc.
+// Maneja el estado de selección y notifica cambios vía callback.
+// Funciona con un ExpansionTile que expande para mostrar checkboxes por sección.
+
 class CategoryFilterWidget extends StatefulWidget {
-  const CategoryFilterWidget({super.key});
+  final Function(Set<String>, String)?
+  onFilterChanged; // Callback para notificar cambios en filtros y modo.
+
+  const CategoryFilterWidget({super.key, this.onFilterChanged}); // Constructor.
 
   @override
-  State<CategoryFilterWidget> createState() => _CategoryFilterWidgetState();
+  State<CategoryFilterWidget> createState() => _CategoryFilterWidgetState(); // Crea estado.
 }
 
 class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
   final Map<String, List<String>> sectionCategories = {
+    // Mapa de secciones y sus categorías.
     'Generación': [
-      'Gen I',
-      'Gen II',
-      'Gen III',
-      'Gen IV',
-      'Gen V',
-      'Gen VI',
-      'Gen VII',
-      'Gen VIII',
-      'Gen IX',
+      // Sección de generaciones.
+      'generation-i',
+      'generation-ii',
+      'generation-iii',
+      'generation-iv',
+      'generation-v',
+      'generation-vi',
+      'generation-vii',
+      'generation-viii',
+      'generation-ix',
     ],
     'Tipos': [
-      'Grass',
-      'Fire',
-      'Water',
-      'Electric',
-      'Ice',
-      'Fighting',
-      'Poison',
-      'Ground',
-      'Flying',
-      'Psychic',
-      'Bug',
-      'Rock',
-      'Ghost',
-      'Dragon',
-      'Dark',
-      'Steel',
-      'Fairy',
+      // Sección de tipos.
+      'grass',
+      'fire',
+      'water',
+      'electric',
+      'ice',
+      'fighting',
+      'poison',
+      'ground',
+      'flying',
+      'psychic',
+      'bug',
+      'rock',
+      'ghost',
+      'dragon',
+      'dark',
+      'steel',
+      'fairy',
     ],
-    'Regiones': [
-      'Kanto',
-      'Johto',
-      'Hoenn',
-      'Sinnoh',
-      'Unova',
-      'Kalos',
-      'Alola',
-      'Galar',
-      'Paldea',
+    'Otros': ['Legendary', 'Mythical'], // Otros como legendarios.
+    'Colores': [
+      // Colores de Pokémon.
+      'black',
+      'blue',
+      'brown',
+      'gray',
+      'green',
+      'pink',
+      'purple',
+      'red',
+      'white',
+      'yellow',
     ],
-    'Otros': ['Legendary', 'Mythical', 'Starter', 'Pseudo-Legendary', 'Fossil'],
-  }; // Cambio con API:
-  final Set<String> _selectedCategories = {};
-  String _filterMode = 'OR'; // Valor inicial
+    'Hábitats': [
+      // Hábitats.
+      'cave',
+      'forest',
+      'grass',
+      'meadow',
+      'mountain',
+      'rough-terrain',
+      'sea',
+      'urban',
+      'waters-edge',
+    ],
+    'Formas': [
+      // Formas corporales.
+      'ball',
+      'squiggle',
+      'fish',
+      'arms',
+      'blob',
+      'upright',
+      'legs',
+      'quadruped',
+      'wings',
+      'tentacles',
+      'heads',
+      'humanoid',
+      'bug-wings',
+      'armor',
+    ],
+    'Grupos de Huevos': [
+      // Grupos de huevos.
+      'monster',
+      'water_1',
+      'bug',
+      'flying',
+      'field',
+      'fairy',
+      'grass',
+      'human_like',
+      'water_3',
+      'mineral',
+      'amorphous',
+      'water_2',
+      'ditto',
+      'dragon',
+    ],
+  };
+  final Set<String> _selectedCategories =
+      {}; // Conjunto de categorías seleccionadas.
+  String _filterMode = 'OR'; // Modo de filtro por defecto OR.
 
   @override
   Widget build(BuildContext context) {
+    // Construye la UI.
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+      // Padding alrededor del ExpansionTile.
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10.0,
+        vertical: 8.0,
+      ), // Espacio horizontal y vertical.
       child: ExpansionTile(
-        title: const Text(
+        // Tile expandible.
+        title: Text(
           'Filtrar por categorías',
-        ), // Título del panel; se expande al tocar.
-        leading: const Icon(Icons.filter_list),
+          style: TextStyles.bodyText,
+        ), // Título.
+        leading: Icon(
+          Icons.filter_list,
+          color: AppColors.primary,
+        ), // Icono de filtro.
         children: [
-          // Modo OR/AND
+          // Hijos cuando expandido.
           Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child:
-                rowFilterMode(), //configuracion de botones or/and separada en un método para modular
+            // Padding para el modo de filtro.
+            padding: const EdgeInsets.only(bottom: 8.0), // Espacio inferior.
+            child: rowFilterMode(), // Widget para seleccionar modo.
           ),
-          // Contenido con ListView dentro de SizedBox
+          ElevatedButton(
+            // Botón para limpiar filtros.
+            style: ElevatedButton.styleFrom(
+              // Estilo del botón.
+              backgroundColor: AppColors.primary, // Color primario.
+              foregroundColor: AppColors.accent, // Color de texto.
+            ),
+            onPressed: () {
+              // Acción al presionar.
+              setState(() {
+                // Actualiza estado.
+                _selectedCategories.clear(); // Limpia selección.
+              });
+              if (widget.onFilterChanged != null) {
+                // Notifica si hay callback.
+                widget.onFilterChanged!({}, _filterMode);
+              }
+            },
+            child: Text(
+              'Limpiar filtros',
+              style: TextStyles.menuText,
+            ), // Texto del botón.
+          ),
           SizedBox(
+            // Contenedor con altura fija para la lista.
             height:
                 MediaQuery.of(context).size.height *
-                0.4, // Límite de altura (40% de la ventana)
-            child: listViewCategories(context), //
+                0.4, // 40% de la altura de pantalla.
+            child: listViewCategories(context), // Lista de categorías.
           ),
         ],
       ),
     );
-
-    // Faltante: Botón para limpiar filtros (_selectedCategories.clear(); setState(() {});).
-    // Cambio con API: Agregar callback onFilterChanged: Function(Set<String>, String)? para enviar selecciones al padre y filtrar Pokémon.
-    // Ej: En onChanged de checkbox y dropdown, llamar widget.onFilterChanged(_selectedCategories, _filterMode);
   }
 
   ListView listViewCategories(BuildContext context) {
+    // Función para construir la lista de categorías.
     return ListView(
-      shrinkWrap:
-          true, //Evita que ListView ocupe espacio infinito, ajustándose a su contenido
+      // ListView para secciones.
+      shrinkWrap: true, // Se ajusta al contenido.
       children: sectionCategories.entries.map((entry) {
-        // La función recibe 'entry' (MapEntry<String, List<String>>: key=título sección, value=lista categorías) y devuelve Column.
-        // Elementos: entry.key (ej: 'Generación'), entry.value (ej: ['Gen I', ...]).
-        // Por qué map: Genera widgets dinámicamente por sección; escalable si se agregan más.
-        final sectionTitle = entry.key;
-        final cats = entry.value; // Lista de categorías por sección.
+        // Mapea cada sección.
+        final sectionTitle = entry.key; // Título de sección.
+        final cats = entry.value; // Lista de categorías.
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          // Columna por sección.
+          crossAxisAlignment:
+              CrossAxisAlignment.start, // Alinea a la izquierda.
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 16.0, bottom: 8.0, top: 8.0),
+              // Padding para título de sección.
+              padding: const EdgeInsets.only(
+                left: 16.0,
+                bottom: 8.0,
+                top: 8.0,
+              ), // Espacios.
               child: Text(
                 sectionTitle,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
-                ),
-              ),
+                style: TextStyles.bodyText,
+              ), // Texto del título.
             ),
             Wrap(
-              spacing: 10.0,
-              runSpacing: 5.0,
-              alignment: WrapAlignment.start,
+              // Wrap para checkboxes.
+              spacing: 10.0, // Espacio horizontal.
+              runSpacing: 5.0, // Espacio vertical.
+              alignment: WrapAlignment.start, // Alinea al inicio.
               children: cats.map((category) {
-                // map transforma cada String en un SizedBox con CheckboxListTile.
-                // La función recibe 'category' (String, ej: 'Gen I') y devuelve widget.
-                // Elementos: category como título y clave para selección.
-
+                // Mapea cada categoría.
                 final isSelected = _selectedCategories.contains(
                   category,
-                ); //// Verifica si seleccionada.
-
+                ); // Verifica si seleccionada.
                 return SizedBox(
+                  // Tamaño fijo para cada item.
                   width:
                       (MediaQuery.of(context).size.width - 40) /
-                      3.5, // Ancho calculado para 3 por fila; -40 por paddings, /3.5 para espaciado.
+                      3.5, // Ancho calculado.
                   child: CheckboxListTile(
-                    title: Text(category),
-                    value: isSelected, // Estado del checkbox.
+                    // Tile con checkbox.
+                    title: Text(
+                      category,
+                      style: TextStyles.cardText,
+                    ), // Título de categoría.
+                    value: isSelected, // Valor del checkbox.
                     onChanged: (value) {
+                      // Acción al cambiar.
                       if (value != null) {
+                        // Si valor no nulo.
                         setState(() {
+                          // Actualiza estado.
                           if (value) {
-                            _selectedCategories.add(
-                              category,
-                            ); // Agrega si marcado.
+                            // Si seleccionado.
+                            _selectedCategories.add(category); // Agrega.
                           } else {
-                            _selectedCategories.remove(
-                              category,
-                            ); // Quita si desmarcado.
+                            _selectedCategories.remove(category); // Remueve.
                           }
                         });
-                        print(
-                          'Categorías seleccionadas: ${_selectedCategories.toList()}',
-                        );
+                        if (widget.onFilterChanged != null) {
+                          // Notifica.
+                          widget.onFilterChanged!(
+                            _selectedCategories,
+                            _filterMode,
+                          );
+                        }
                       }
                     },
-                    controlAffinity: ListTileControlAffinity
-                        .leading, //Controla la posición del checkbox en CheckboxListTile (leading = izquierda, trailing = derecha).
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
+                    controlAffinity:
+                        ListTileControlAffinity.leading, // Checkbox al inicio.
+                    contentPadding: EdgeInsets.zero, // Sin padding.
+                    dense: true, // Denso para ahorrar espacio.
                   ),
                 );
-              }).toList(), // Convierte a List<Widget> para children
+              }).toList(), // Convierte a lista.
             ),
           ],
         );
-      }).toList(),
+      }).toList(), // Convierte a lista.
     );
   }
 
   Row rowFilterMode() {
-    //función que retorna el row que contiene el Dropdownbutton
+    // Función para el row del modo de filtro.
     return Row(
-      mainAxisAlignment:
-          MainAxisAlignment.end, // Alinea el dropdown a la derecha;
+      // Row para alinear elementos.
+      mainAxisAlignment: MainAxisAlignment.end, // Alinea al final.
       children: [
-        const Text('Modo: '),
+        Text('Modo: ', style: TextStyles.bodyText), // Texto "Modo:".
         DropdownButton<String>(
-          value: _filterMode, // Valor actual; sincronizado con estado.
+          // Dropdown para seleccionar modo.
+          value: _filterMode, // Valor actual.
           items: const [
+            // Items fijos.
             DropdownMenuItem(value: 'OR', child: Text('OR')),
             DropdownMenuItem(value: 'AND', child: Text('AND')),
           ],
           onChanged: (value) {
+            // Acción al cambiar.
             if (value != null) {
+              // Si no nulo.
               setState(() {
-                _filterMode = value; // Actualiza estado; redibuja el dropdown.
+                // Actualiza estado.
+                _filterMode = value; // Cambia modo.
               });
-              print(
-                'Modo seleccionado: $_filterMode',
-              ); // Placeholder; aquí iría callback al padre para refiltrar.
+              if (widget.onFilterChanged != null) {
+                // Notifica.
+                widget.onFilterChanged!(_selectedCategories, _filterMode);
+              }
             }
           },
         ),

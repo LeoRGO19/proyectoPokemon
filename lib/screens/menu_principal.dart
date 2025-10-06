@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/core/text_styles.dart';
-import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/screens/imc_pokedex_screen.dart';
 
 class MenuPrincipal extends StatefulWidget {
@@ -17,7 +16,13 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
       appBar: customAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: SizedBox(
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondomain.jpg'),
+              fit: BoxFit.cover, // ocupa todo el contenedor
+            ),
+          ),
           width: double.infinity,
           child: Column(
             mainAxisAlignment:
@@ -44,15 +49,20 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
           ),
         ),
       ),
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color.fromARGB(255, 0, 0, 0),
     );
   }
 }
 
 AppBar customAppBar() {
   return AppBar(
-    title: Text('Pkmn-HUB', style: TextStyles.bodyText),
-    backgroundColor: AppColors.primary,
-    foregroundColor: Colors.black,
+    title: Text(
+      'Pkmn-HUB',
+      style: TextStyles.bodyText.copyWith(
+        color: Color.fromARGB(255, 255, 255, 255),
+      ),
+    ),
+    backgroundColor: const Color.fromARGB(255, 41, 37, 37),
+    foregroundColor: const Color.fromARGB(255, 255, 255, 255),
   );
 }
