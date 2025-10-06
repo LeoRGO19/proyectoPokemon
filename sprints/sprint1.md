@@ -9,8 +9,10 @@ Logramos a lo largo del Sprint, la lista completa de los pokemon a lo largo de l
 # **Retrospectiva**
 ## Problemas:
 Al crear la logica de combinar busquedas ya que presentaba problemas actualizando la lista desplegable. Como el servicio con la API hacia multiples peticiones hubo que limitar el numero de pokemons por peticiones, implementando el client para reutilizar peticiones y consumir menos recursos al mantener la conexion abierta. Esto presentaba problemas con el hilo principal ya que hacia que la app se sobrecargara con informacion disminuyendo el rendimiento, como solucion se implementaron los Isolates. La funcion de evoluciones fue compleja al integrarla ya que se presentaban errores de overflow con respecto a los tamaños de los objetos graficos. Volviendo a la API nos dimos cuenta que esta presentaba errores de datos incompletos con pokemons mas alla del #1025.
-
+Falta de comunicación directa, que resultó en un desfaz entre el código disponible entre los integrantes, lo que afectó el avance del código tratado de forma paralela, y el entendimiento del código a nivel general. 
 
 ## Mejoras: 
 Nos gustaria trabajar en la optimizacion del codigo asi como la mejora en el rendimiento de la app. Aplicar bug fixes y centrarnos en estabilizar nuestro proyecto antes de seguir avanzando, centrandonos en como mencione antes la optimizacion general del proyecto, tomando en cuenta exceptions, bugs y demas.
 Asi tambien como implementar una memoria cache para optimizar las cosas.
+Mantener un documento actualizado sobre los cambios realizados en el código y la intención detrás de estos, con el fin de que todos estén la misma página y el avance del proyecto sea más ameno.
+También hacer tareas más específicas, con el propósito de tener un manejo más simple de estas y permitir prestar mas atención a sus detalles y sutilezas, que se podrían perder cuando solo se ve la tarea general.
