@@ -198,72 +198,60 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
   }
 
   Future<void> _filterBySearch(String query) async {
-    // Función para filtro por búsqueda.
     setState(() {
-      // Actualiza.
-      _searchQuery = query.toLowerCase().trim(); // Set query lower trim.
-      _filteredPokemons.clear(); // Limpia filtered.
+      _searchQuery = query.toLowerCase().trim();
+      _filteredPokemons.clear();
     });
 
-    _specificSearch = false; // Reset específica.
-    _targetSearchId = null; // Reset target.
-    bool needsFetch = false; // Flag fetch.
+    _specificSearch = false;
+    _targetSearchId = null;
+    bool needsFetch = false;
     int? targetId;
+
     if (_searchQuery.isNotEmpty) {
-      // Si hay texto
       try {
         Pokemon? basicPokemon;
         if (int.tryParse(_searchQuery) != null) {
-          // Si es un id.
           int id = int.parse(_searchQuery);
           if (id > _maxPokedexId) {
-            // Si > max.
-            // ID demasiado alto: No existe, mostrar no encontrado
-            setState(() {
-              // Limpia.
-              _filteredPokemons.clear();
-            });
-            return; // Sale.
+            //removido: setState(() { // Limpia._filteredPokemons.clear();});return;.
+          } else {
+            basicPokemon = await PokeApi.fetchPokemonById(
+              id,
+            ); // Fetch exacto por ID.
           }
-          basicPokemon = await PokeApi.fetchPokemonById(id);
         } else {
-          basicPokemon = await PokeApi.fetchPokemonByName(_searchQuery);
+          basicPokemon = await PokeApi.fetchPokemonByName(
+            _searchQuery,
+          ); // Fetch exacto por nombre.
         }
+
         if (basicPokemon != null) {
+          // Si éxito en exacto (ID o nombre full).
           _specificSearch = true;
           final pokemon = await PokeApi.fetchPokemonDetails(
-            // Detalles.
             basicPokemon,
             http.Client(),
           );
-          targetId = int.parse(pokemon.url.split('/')[6]) + 1; // ID +1.
-          _targetSearchId = min(targetId, _maxPokedexId + 1); // Min con max.
+          targetId = int.parse(pokemon.url.split('/')[6]) + 1;
+          _targetSearchId = min(targetId, _maxPokedexId + 1);
           if (_offset < targetId) {
-            // Si necesita más.
             needsFetch = true;
           }
-        } else {
-          // No encontrado
-          setState(() {
-            // Limpia.
-            _filteredPokemons.clear();
-          });
-          return;
         }
+        // REMOVIDO: No hay 'else { clear() return }'; siempre continúa a _applyFilters.
       } catch (e) {
-        debugPrint('Error buscando Pokémon: $e');
-        setState(() {
-          _filteredPokemons.clear();
-        });
-        return;
+        debugPrint('Error buscando Pokémon exacto: $e');
+        // REMOVIDO: No clear ni return; permite filtrado local.
       }
     }
 
     if (needsFetch && targetId != null) {
-      // Si necesita fetch.
-      await _fetchPokemons(targetId: targetId);
+      await _fetchPokemons(
+        targetId: targetId,
+      ); // Solo fetch extra si exacto éxito.
     } else {
-      await _applyFilters();
+      await _applyFilters(); // SIEMPRE aplica filtro local (parciales, vacíos, o combinado).
     }
   }
 
