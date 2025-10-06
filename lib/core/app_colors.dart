@@ -5,7 +5,7 @@ class AppColors {
   static const Color secondary = Color.fromARGB(255, 17, 27, 110);
   static const Color accent = Color.fromARGB(255, 214, 248, 19);
 
-  //Backgrounds
+  // Backgrounds
   static const Color background = Color.fromARGB(255, 0, 78, 72);
   static const Color backgroundComponent = Color.fromARGB(255, 4, 8, 85);
   static const Color backgroundComponentSelected = Color.fromARGB(
@@ -14,4 +14,5 @@ class AppColors {
     33,
     175,
   );
+  static const Color fondoPokedex = Color.fromARGB(255, 0, 255, 98);
 }

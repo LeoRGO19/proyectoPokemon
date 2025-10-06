@@ -1,51 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/core/text_styles.dart';
+import 'package:pokedex/screens/imc_pokemon_details.dart';
 
-// === PokemonCardList.dart ===
-// Widget para lista de tarjetas de Pokémon: Muestra tarjetas en un Wrap responsivo.
-// Cada tarjeta es clickable, con nombre e imagen; usa datos pasados.
-// Para PokeAPI: Recibir lista dinámica (filtrada); cargar imágenes de red (Image.network) de la api en lugar de asset.
+// Widget para lista de cards de Pokémon en grid.
+// Muestra ID, nombre, imagen; clickable a details.
+// Funciona con GridView.builder
+// Muestra la lista filtrada con loading queda por cargar.
+
 class PokemonCardList extends StatelessWidget {
-  final List<Pokemon> pokemons;
+  final List<Pokemon> pokemons; // Lista a mostrar.
+  final ScrollController scrollController; // Controller.
+  final bool isLoading; // Loading.
+  final bool hasMore; // More.
 
-  const PokemonCardList({super.key, required this.pokemons});
-
+  const PokemonCardList({
+    super.key,
+    required this.pokemons,
+    required this.scrollController,
+    required this.isLoading,
+    required this.hasMore,
+  });
   @override
   Widget build(BuildContext context) {
+    // Build.
     if (pokemons.isEmpty) {
-      return const Center(
-        child: Text("No se encontraron Pokémon", style: TextStyles.bodyText),
-      );
+      // Si vacío.
+      if (isLoading) {
+        // Si loading.
+        return const Center(child: CircularProgressIndicator()); // Indicator.
+      } else if (!hasMore) {
+        // No more.
+        return const Center(
+          child: Text(
+            "No se encontraron Pokémon",
+            style: TextStyles.bodyText,
+          ), // Mensaje.
+        );
+      } else {
+        return const Center(child: CircularProgressIndicator()); // Indicator.
+      }
     }
 
-    // Devuelve un padding con las imagenes de los pokemon en una lista
-    return Padding(
+    return GridView.builder(
+      controller: scrollController,
       padding: const EdgeInsets.all(8.0),
-      child: GridView.builder(
-        itemCount: pokemons.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 8.0,
-          mainAxisSpacing: 8.0,
-          childAspectRatio: 0.75,
-        ),
-        itemBuilder: (context, index) {
+      itemCount: pokemons.length + (isLoading ? 1 : 0), // Count + loading.
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4, // 4 columnas.
+        crossAxisSpacing: 8.0,
+        mainAxisSpacing: 8.0,
+        childAspectRatio: 0.65,
+      ),
+      itemBuilder: (context, index) {
+        if (index < pokemons.length) {
+          // Si item real.
           final pokemon = pokemons[index];
-
           final id = pokemon.url.split("/")[6];
           final imageUrl =
               "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png";
 
           return Card(
-            elevation: 2.0,
+            elevation: 7.0,
             shape: RoundedRectangleBorder(
+              // Shape redondeado.
               borderRadius: BorderRadius.circular(10.0),
             ),
             child: InkWell(
-              // Faltante: seleccion para las tarjetas individuales.
+              // Clickable.
               onTap: () {
-                debugPrint('Seleccionado: ${pokemon.name}');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PokemonDetailScreen(pokemon: pokemon),
+                  ),
+                );
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -60,8 +89,8 @@ class PokemonCardList extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.0),
                     child: Image.network(
                       imageUrl,
-                      width: 70.0,
-                      height: 70.0,
+                      width: 200.0,
+                      height: 200.0,
                       fit: BoxFit.contain,
                       loadingBuilder: (context, child, progress) {
                         if (progress == null) return child;
@@ -69,16 +98,27 @@ class PokemonCardList extends StatelessWidget {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         );
                       },
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.error, size: 40, color: Colors.red),
+                      errorBuilder:
+                          (context, error, stackTrace) => // Error.
+                          const Icon(
+                            Icons.error,
+                            size: 40,
+                            color: Colors.red,
+                          ), // Icon.
                     ),
                   ),
                 ],
               ),
             ),
           );
-        },
-      ),
+        } else {
+          return const Padding(
+            // Loading item.
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+      },
     );
   }
 }
