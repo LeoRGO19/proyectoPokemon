@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokeapi.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/screens/menu_principal.dart';
+import 'package:pokedex/screens/favorito.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:http/http.dart' as http;
@@ -172,17 +173,25 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                       height: titleHeight, // Altura calculada.
                       width: double.infinity, // Ancho full.
                       color: Color.fromRGBO(0, 0, 0, 1), // Negro.
-                      child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         // Centra texto.
-                        child: Text(
-                          // Texto ID y nombre.
-                          '#${_details['id']} ${widget.pokemon.name.toUpperCase()}',
-                          style: TextStyles.bodyText.copyWith(
-                            // Estilo con color blanco y size 24.
-                            color: const Color.fromARGB(255, 255, 255, 255),
-                            fontSize: 24,
+                        children: [
+                          Text(
+                            // Texto ID y nombre.
+                            '#${_details['id']} ${widget.pokemon.name.toUpperCase()}',
+                            style: TextStyles.bodyText.copyWith(
+                              // Estilo con color blanco y size 24.
+                              color: const Color.fromARGB(255, 255, 255, 255),
+                              fontSize: 24,
+                            ),
                           ),
-                        ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.05,
+                            height: titleHeight,
+                            child: BotonFavorito(pokemon: widget.pokemon),
+                          ),
+                        ],
                       ),
                     ),
                     Expanded(

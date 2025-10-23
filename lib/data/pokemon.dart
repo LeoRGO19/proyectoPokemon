@@ -13,6 +13,7 @@ class Pokemon {
   final String? habitat;
   final String? shape;
   final List<String> eggGroups;
+  bool isFav;
 
   Pokemon({
     required this.name,
@@ -25,6 +26,7 @@ class Pokemon {
     this.habitat,
     this.shape,
     this.eggGroups = const [],
+    this.isFav = false,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
@@ -58,5 +60,8 @@ class Pokemon {
       shape: shape,
       eggGroups: eggGroups,
     );
+  }
+  void changeFav() {
+    isFav = !isFav;
   }
 }
