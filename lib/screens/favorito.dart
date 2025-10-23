@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon.dart';
+import 'package:pokedex/main.dart';
+import 'package:pokedex/screens/menu_principal.dart';
 
 class BotonFavorito extends StatefulWidget {
-  //final String pokemon;
   final Pokemon pokemon; // Pokémon que es afectado por el favorito
   const BotonFavorito({super.key, required this.pokemon}); // Constructor.
   @override
@@ -10,14 +11,12 @@ class BotonFavorito extends StatefulWidget {
 }
 
 class _BotonFavoritoState extends State<BotonFavorito> {
-  final List<Pokemon> _favoritePokemons = [];
-  //final List<String> _favoritePokemons = [];
-
   late String _currentImagePath;
 
   @override
   void initState() {
     super.initState();
+    widget.pokemon.checkFav();
     _currentImagePath = widget.pokemon.isFav
         ? 'assets/images/fav.png'
         : 'assets/images/nofav.png';
@@ -38,11 +37,9 @@ class _BotonFavoritoState extends State<BotonFavorito> {
       onPressed: () {
         _toggleImage();
         if (widget.pokemon.isFav) {
-          _favoritePokemons.add(widget.pokemon);
-          print("yipii");
+          MainApp.favoritePokemons.add(widget.pokemon.name);
         } else {
-          _favoritePokemons.remove(widget.pokemon);
-          print("no yipii");
+          MainApp.favoritePokemons.remove(widget.pokemon.name);
         }
       },
       child: Image.asset(_currentImagePath, width: 50, height: 50),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/screens/imc_pokedex_screen.dart';
+import 'package:pokedex/data/pokemon.dart';
 
 class MenuPrincipal extends StatefulWidget {
   const MenuPrincipal({super.key});
