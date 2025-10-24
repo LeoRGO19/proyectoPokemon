@@ -52,7 +52,11 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
       'steel',
       'fairy',
     ],
-    'Otros': ['Legendary', 'Mythical', 'Favorito'], // Otros como legendarios.
+    'Otros': [
+      'Legendary',
+      'Mythical',
+      'Favorito',
+    ], // Otros como legendarios y si son favoritos.
     'Colores': [
       // Colores de Pokémon.
       'black',

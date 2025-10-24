@@ -13,8 +13,6 @@ void main() {
 }
 
 class MainApp extends StatelessWidget {
-  static List<String> favoritePokemons =
-      []; //lista donde los pokémon favoritos son guardados
   const MainApp({super.key});
 
   @override

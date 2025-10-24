@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:pokedex/data/favoriteWatcher.dart';
 import 'package:pokedex/data/pokemon.dart';
 
+//boton que permite marcar a un pokémon como favorito
 class BotonFavorito extends StatelessWidget {
   final Pokemon pokemon;
 
@@ -10,7 +11,7 @@ class BotonFavorito extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // listen to provider
+    // escucha a provider por cambios
     final favorites = context.watch<FavoritesProvider>();
     final isFav = favorites.isFavorite(pokemon.name);
 
@@ -18,11 +19,15 @@ class BotonFavorito extends StatelessWidget {
       onPressed: () {
         favorites.toggleFavorite(pokemon.name);
       },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color.fromRGBO(0, 0, 0, 1),
+        splashFactory: NoSplash.splashFactory,
+      ),
 
       child: Image.asset(
-        isFav ? 'assets/images/fav.png' : 'assets/images/nofav.png',
-        width: 50,
-        height: 50,
+        isFav ? 'assets/images/fullStar.png' : 'assets/images/hollowStar.png',
+        width: 70,
+        height: 70,
       ),
     );
   }

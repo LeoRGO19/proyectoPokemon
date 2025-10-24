@@ -279,7 +279,10 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
 
   Future<void> _applyFilters() async {
     List<Pokemon> results = List.from(_allPokemons); // Copia all.
-    final favoritesProvider = context.read<FavoritesProvider>();
+    final favoritesProvider = context
+        .read<
+          FavoritesProvider
+        >(); //servirá para revisar si pokémon es favorito
     bool hasFilters =
         _selectedCategories.isNotEmpty ||
         _searchQuery.isNotEmpty; // Hay filtros?

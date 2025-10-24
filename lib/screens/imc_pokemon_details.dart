@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokeapi.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/screens/menu_principal.dart';
-//import 'package:pokedex/screens/favorito.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:http/http.dart' as http;
@@ -189,6 +188,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                               fontSize: 24,
                             ),
                           ),
+                          //se agrega  botón para marcar como favorito
                           SizedBox(
                             width: titleHeight,
                             height: titleHeight,
@@ -302,7 +302,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                                   child: InkWell(
                                                     // Para tap.
                                                     onTap: () async {
-                                                      // 🔹 Navigate to next evolution details
+                                                      // 🔹 Navigate a detalles de evolución
                                                       await Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
