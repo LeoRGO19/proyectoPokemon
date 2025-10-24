@@ -2,6 +2,7 @@
 // Representa data básica y extendida.
 // Funciona con factories para fromJson y withDetails.
 // Objetivo: Almacenar data fetched para UI y filtros.
+import 'package:pokedex/data/favoriteWatcher.dart';
 import 'package:pokedex/main.dart';
 import 'package:pokedex/screens/menu_principal.dart';
 
@@ -16,7 +17,7 @@ class Pokemon {
   final String? habitat;
   final String? shape;
   final List<String> eggGroups;
-  late bool isFav;
+  //late bool isFav;
 
   Pokemon({
     required this.name,
@@ -29,7 +30,7 @@ class Pokemon {
     this.habitat,
     this.shape,
     this.eggGroups = const [],
-  }) : isFav = MainApp.favoritePokemons.contains(name);
+  }); //: isFav = MainApp.favoritePokemons.contains(name);
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
     if (json['name'] == null || json['url'] == null) {
@@ -63,14 +64,14 @@ class Pokemon {
       eggGroups: eggGroups,
     );
   }
-  void changeFav() {
+  /*void changeFav() {
     checkFav();
     isFav = !isFav;
   }
 
-  void checkFav() {
-    isFav = MainApp.favoritePokemons.contains(
+  bool checkFav() {
+    return context.read<FavoritesProvider>().isFavorite(
       name,
     ); //chequea que efectivamente isFav está marcado correctamente
-  }
+  }*/
 }

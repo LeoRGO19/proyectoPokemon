@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokeapi.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/screens/menu_principal.dart';
-import 'package:pokedex/screens/favorito.dart';
+//import 'package:pokedex/screens/favorito.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/components/characteristic_widget.dart';
 import 'package:pokedex/components/pokedex_components/stats_chart_widget.dart';
+import 'package:provider/provider.dart';
+import 'package:pokedex/data/favoriteWatcher.dart';
+import 'package:pokedex/screens/fav.dart';
 
 // Pantalla principal de detalles de Pokémon.
 // Esta pantalla carga y muestra detalles detallados de un Pokémon específico.
@@ -187,7 +190,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                             ),
                           ),
                           SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.05,
+                            width: titleHeight,
                             height: titleHeight,
                             child: BotonFavorito(pokemon: widget.pokemon),
                           ),
@@ -298,7 +301,23 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                                   // Card clickable.
                                                   child: InkWell(
                                                     // Para tap.
-                                                    onTap: () {
+                                                    onTap: () async {
+                                                      // 🔹 Navigate to next evolution details
+                                                      await Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              PokemonDetailScreen(
+                                                                pokemon: Pokemon(
+                                                                  name:
+                                                                      evolution['name'],
+                                                                  url:
+                                                                      evolution['url'],
+                                                                ),
+                                                              ),
+                                                        ),
+                                                      );
+                                                      /*onTap: () {
                                                       // Navega a detalles de evolución.
                                                       Navigator.push(
                                                         context,
@@ -313,7 +332,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                                                 ),
                                                               ),
                                                         ),
-                                                      );
+                                                      );*/
                                                     },
                                                     child: Column(
                                                       // Columna imagen y texto.

@@ -9,6 +9,8 @@ import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'dart:isolate';
 import 'package:http/http.dart' as http;
+import 'package:pokedex/data/favoriteWatcher.dart';
+import 'package:provider/provider.dart';
 
 // Pantalla principal de la Pokédex, muestra lista filtrable de Pokémon.
 // Funciona cargando Pokémon en batches usando Isolates para no bloquear UI, con infinite scroll.
@@ -277,6 +279,7 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
 
   Future<void> _applyFilters() async {
     List<Pokemon> results = List.from(_allPokemons); // Copia all.
+    final favoritesProvider = context.read<FavoritesProvider>();
     bool hasFilters =
         _selectedCategories.isNotEmpty ||
         _searchQuery.isNotEmpty; // Hay filtros?
@@ -298,6 +301,9 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
           } else if (cat.toLowerCase() == 'legendary' && pokemon.isLegendary) {
             matches = true;
           } else if (cat.toLowerCase() == 'mythical' && pokemon.isMythical) {
+            matches = true;
+          } else if (cat.toLowerCase() == 'favorito' &&
+              favoritesProvider.isFavorite(pokemon.name)) {
             matches = true;
           } else if (pokemon.color.toLowerCase() == cat.toLowerCase()) {
             matches = true;
