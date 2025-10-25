@@ -14,5 +14,6 @@ class AppColors {
     33,
     175,
   );
-  static const Color fondoPokedex = Color.fromARGB(255, 0, 255, 98);
+  static const Color fondoPokedex = Color.fromARGB(255, 0, 174, 255);
+  static const Color fontoTituloDetalle = Color.fromRGBO(0, 0, 0, 1);
 }

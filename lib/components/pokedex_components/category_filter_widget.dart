@@ -74,6 +74,7 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
       CategoryFilter(displayName: 'Siniestro', filterValue: 'dark'),
       CategoryFilter(displayName: 'Acero', filterValue: 'steel'),
       CategoryFilter(displayName: 'Hada', filterValue: 'fairy'),
+      CategoryFilter(displayName: 'Normal', filterValue: 'normal'),
     ],
     'Otros': [
       CategoryFilter(displayName: 'Legendario', filterValue: 'Legendary'),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/data/favoriteWatcher.dart';
 import 'package:pokedex/data/pokemon.dart';
+import 'package:pokedex/core/app_colors.dart';
 
 //boton que permite marcar a un pokémon como favorito
 class BotonFavorito extends StatelessWidget {
@@ -20,7 +21,7 @@ class BotonFavorito extends StatelessWidget {
         favorites.toggleFavorite(pokemon.name);
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color.fromRGBO(0, 0, 0, 1),
+        backgroundColor: AppColors.fontoTituloDetalle,
         splashFactory: NoSplash.splashFactory,
       ),
 

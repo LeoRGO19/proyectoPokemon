@@ -3,7 +3,9 @@ import 'package:pokedex/screens/menu_principal.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/data/favoriteWatcher.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => FavoritesProvider(),

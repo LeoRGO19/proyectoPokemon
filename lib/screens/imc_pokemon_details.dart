@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pokedex/core/traductor.dart';
 import 'package:pokedex/data/pokeapi.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/screens/menu_principal.dart';
@@ -69,7 +68,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     'fairy': 'Hada',
     'normal': 'Normal',
   };
-
+  //mapa que permite la traducción de las generaciones de pokémon
   static const Map<String, String> tradGen = {
     'generation-i': '1° generación',
     'generation-ii': '2° generación',
@@ -139,6 +138,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
         orElse: () => {'genus': 'No disponible'},
       )['genus']; // Genus o default.
 
+      if (!mounted) return; //chequea que sea visible, si no sale
+
       setState(() {
         // Actualiza estado.
         _details = details; // Asigna detalles.
@@ -154,6 +155,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
         _isLoading = false; // Fin de carga.
       });
     } catch (e) {
+      if (!mounted) return; //chequea que sea visible, si no sale
+
       // Catch error.
       setState(() {
         // Actualiza con error.
@@ -209,7 +212,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                       // Contenedor título.
                       height: titleHeight, // Altura calculada.
                       width: double.infinity, // Ancho full.
-                      color: Color.fromRGBO(0, 0, 0, 1), // Negro.
+                      color: AppColors.fontoTituloDetalle, // Negro.
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         // Centra texto.
@@ -337,7 +340,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                                   child: InkWell(
                                                     // Para tap.
                                                     onTap: () async {
-                                                      // 🔹 Navigate a detalles de evolución
+                                                      // navega a detalles de evolución
                                                       await Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
