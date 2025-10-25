@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex/core/traductor.dart';
 import 'package:pokedex/data/pokeapi.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/screens/menu_principal.dart';
@@ -46,6 +47,40 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   String _category = ''; // Categoría (genus).
   bool _isLoading = true; // Flag de carga.
   String _error = ''; // Mensaje de error.
+  //mapa con traducciones de tipo para utilizar al mostrarlas en la descripción del pokémon
+  // hacemos esto de forma manual en vez de pedir este dato ya traducido desde la opkeapi porque eso consume AÚN más recursos
+  static const Map<String, String> traduccionesTipo = {
+    'grass': 'Planta',
+    'fire': 'Fuego',
+    'water': 'Agua',
+    'electric': 'Eléctrico',
+    'ice': 'Hielo',
+    'fighting': 'Lucha',
+    'poison': 'Veneno',
+    'ground': 'Tierra',
+    'flying': 'Volador',
+    'psychic': 'Psíquico',
+    'bug': 'Bicho',
+    'rock': 'Roca',
+    'ghost': 'Fantasma',
+    'dragon': 'Dragón',
+    'dark': 'Siniestro',
+    'steel': 'Acero',
+    'fairy': 'Hada',
+    'normal': 'Normal',
+  };
+
+  static const Map<String, String> tradGen = {
+    'generation-i': '1° generación',
+    'generation-ii': '2° generación',
+    'generation-iii': '3° generación',
+    'generation-iv': '4° generación',
+    'generation-v': '5° generación',
+    'generation-vi': '6° generación',
+    'generation-vii': '7° generación',
+    'generation-viii': '8° generación',
+    'generation-ix': '9° generación',
+  };
 
   @override
   void initState() {
@@ -443,14 +478,24 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   CharacteristicWidget(
                     title: 'Tipo:',
                     value: _types.isNotEmpty
-                        ? _types.join(', ').toUpperCase()
+                        //? _types.join(', ').toUpperCase()
+                        ? _types
+                              .map(
+                                (t) =>
+                                    traduccionesTipo[t.toLowerCase()] ??
+                                    t, //traduce los tipos
+                              )
+                              .join(', ')
+                              .toUpperCase()
                         : 'No disponible',
                     backgroundColor: AppColors.primary,
                   ),
                   CharacteristicWidget(
                     title: 'Generación:',
                     value: _generation.isNotEmpty
-                        ? _generation
+                        //? _generation
+                        ? (tradGen[_generation.toLowerCase()] ??
+                              _generation) //traduce la generación
                         : 'No disponible',
                     backgroundColor: AppColors.secondary,
                   ),
@@ -474,7 +519,15 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   CharacteristicWidget(
                     title: 'Debilidades:',
                     value: _weaknesses.isNotEmpty
-                        ? _weaknesses.join(', ').toUpperCase()
+                        //? _weaknesses.join(', ').toUpperCase()
+                        ? _weaknesses
+                              .map(
+                                (t) =>
+                                    traduccionesTipo[t.toLowerCase()] ??
+                                    t, //traduce debilidades
+                              )
+                              .join(', ')
+                              .toUpperCase()
                         : 'No disponible',
                     backgroundColor: AppColors.secondary,
                   ),

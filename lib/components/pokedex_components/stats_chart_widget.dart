@@ -14,11 +14,11 @@ class StatsChartWidget extends StatelessWidget {
     final statNames = [
       // Nombres fijos de stats.
       'HP',
-      'Attack',
-      'Defense',
-      'Sp. Atk',
-      'Sp. Def',
-      'Speed',
+      'Ataque',
+      'Defensa',
+      'Ataque especial',
+      'Defensa especial',
+      'Velocidad',
     ];
     final statValues = stats
         .map((s) => s['base_stat'] as int)
@@ -47,7 +47,7 @@ class StatsChartWidget extends StatelessWidget {
                   // Tamaño fijo para nombre.
                   width:
                       MediaQuery.of(context).size.width *
-                      0.08, // Ancho proporcional.
+                      0.1, // Ancho proporcional.
                   child: Text(
                     statNames[index],
                     style: TextStyles.cardText,
