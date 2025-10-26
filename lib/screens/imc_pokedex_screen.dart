@@ -108,9 +108,9 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
-    final isComplete = await db
+    final int dataSaved = await db
         .checkData(); //si es que los pokemon estan en la base de datos los carga desde ahí y no desde la PokeApi
-    if (isComplete && _offset == 0) {
+    if (dataSaved == 1025 && _offset == 0) {
       print('Todos los pokémon están en la base de datos, subiendo...');
       final saved = await db.getPokemon();
       setState(() {
@@ -129,6 +129,10 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
       () => _isLoading = true,
     ); // Loading true dado que vamos a hacer fetch
     try {
+      final saved = await db.getPokemon();
+      _allPokemons.clear(); //por si hay duplicates
+      _allPokemons.addAll(saved);
+      _offset = dataSaved;
       int targetOffset = targetId ?? _maxPokedexId; // Target o max.
       // Limitar a 1025 para evitar IDs altos con datos incompletos
       targetOffset = min(targetOffset, _maxPokedexId); // Min.
@@ -157,6 +161,7 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
                 _hasMore = false;
               }
               _allPokemons.addAll(isolateResult); // Agrega a all.
+              _applyFilters(); //permite que pokémon se vean
               for (var pokemon in isolateResult) {
                 // Print debug.
                 print(
@@ -283,7 +288,7 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
 
   Future<void> _onCategoriesChanged(Set<String> selected, String mode) async {
     // Función para cambio categorías.
-    if (_isLoading) return;
+    //if (_isLoading) return;
     setState(() {
       _selectedCategories = selected;
       _filterMode = mode;
@@ -294,9 +299,10 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
     final targetId = _calculateTargetId(selected); // Calcula target.
     bool needsFetch = targetId != null && _offset < targetId; // Necesita?
 
-    if (needsFetch) {
+    if (needsFetch && !_isLoading) {
       await _fetchPokemons(targetId: targetId);
     } else {
+      //si no ha terminado de cargar no nos preocupamos con fetch y mostramos lo que tenemos
       await _applyFilters();
     }
   }
