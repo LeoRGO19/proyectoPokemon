@@ -129,10 +129,14 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
       () => _isLoading = true,
     ); // Loading true dado que vamos a hacer fetch
     try {
-      final saved = await db.getPokemon();
-      _allPokemons.clear(); //por si hay duplicates
-      _allPokemons.addAll(saved);
-      _offset = dataSaved;
+      if (dataSaved != 0) {
+        //si hay datos en la base de datos los carga
+        final saved = await db.getPokemon();
+        _allPokemons.clear(); //por si hay duplicates
+        _allPokemons.addAll(saved);
+        _applyFilters(); //para verlos
+      }
+      _offset = dataSaved; //comienza desde el ultimo pokemon guardado
       int targetOffset = targetId ?? _maxPokedexId; // Target o max.
       // Limitar a 1025 para evitar IDs altos con datos incompletos
       targetOffset = min(targetOffset, _maxPokedexId); // Min.
@@ -160,6 +164,7 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
                 // Si vacío o max.
                 _hasMore = false;
               }
+              db.addPokemon(isolateResult);
               _allPokemons.addAll(isolateResult); // Agrega a all.
               _applyFilters(); //permite que pokémon se vean
               for (var pokemon in isolateResult) {

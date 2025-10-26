@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/data/pokemon.dart';
 import 'dart:isolate';
-import "package:pokedex/services/database_services.dart";
 
 // Clase para interactuar con PokeAPI.
 // Proporciona métodos para fetch listas, detalles, evoluciones, etc.
@@ -20,8 +19,6 @@ import "package:pokedex/services/database_services.dart";
 
 class PokeApi {
   static const Duration _timeoutDuration = Duration(seconds: 30);
-
-  static final DatabaseService _databaseService = DatabaseService.instance;
 
   static Future<List<Pokemon>> fetchAllPokemonInIsolate({
     // Fetch batch en Isolate.
@@ -49,7 +46,6 @@ class PokeApi {
           basicPokemons.map((p) => fetchPokemonDetails(p, client)).toList(),
         );
 
-        _databaseService.addPokemon(detailedPokemons);
         sendPort.send(detailedPokemons); // Envía lista.
         client.close(); // Cierra.
         return detailedPokemons;

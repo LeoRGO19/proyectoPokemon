@@ -71,7 +71,6 @@ class DatabaseService {
         conflictAlgorithm:
             ConflictAlgorithm.replace, //reemplaza si encuentra datos
       );
-      print("pokemon guardados");
     }
   }
 
