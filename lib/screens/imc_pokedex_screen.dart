@@ -9,6 +9,11 @@ import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'dart:isolate';
 import 'package:http/http.dart' as http;
+import 'package:pokedex/data/favoriteWatcher.dart';
+import 'package:provider/provider.dart';
+import 'package:pokedex/services/database_services.dart';
+import 'dart:io';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 // Pantalla principal de la Pokédex, muestra lista filtrable de Pokémon.
 // Funciona cargando Pokémon en batches usando Isolates para no bloquear UI, con infinite scroll.
@@ -97,6 +102,27 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
   }
 
   Future<void> _fetchPokemons({int? targetId}) async {
+    final db = DatabaseService.instance;
+    if (Platform.isWindows || Platform.isLinux) {
+      //crea base de datos correctamente
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+    final isComplete = await db
+        .checkData(); //si es que los pokemon estan en la base de datos los carga desde ahí y no desde la PokeApi
+    if (isComplete && _offset == 0) {
+      print('Todos los pokémon están en la base de datos, subiendo...');
+      final saved = await db.getPokemon();
+      setState(() {
+        _allPokemons.clear(); //me aseguro de no subir dos veces
+        _allPokemons.addAll(saved);
+        _isLoading = false;
+        _hasMore = false;
+      });
+      _filteredPokemons.clear();
+      await _applyFilters();
+      return;
+    }
     // Función para fetch batch.
     if (_isLoading) return; // Si ya está cargando, sale.
     setState(
@@ -277,6 +303,10 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
 
   Future<void> _applyFilters() async {
     List<Pokemon> results = List.from(_allPokemons); // Copia all.
+    final favoritesProvider = context
+        .read<
+          FavoritesProvider
+        >(); //servirá para revisar si pokémon es favorito
     bool hasFilters =
         _selectedCategories.isNotEmpty ||
         _searchQuery.isNotEmpty; // Hay filtros?
@@ -298,6 +328,9 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
           } else if (cat.toLowerCase() == 'legendary' && pokemon.isLegendary) {
             matches = true;
           } else if (cat.toLowerCase() == 'mythical' && pokemon.isMythical) {
+            matches = true;
+          } else if (cat.toLowerCase() == 'favorito' &&
+              favoritesProvider.isFavorite(pokemon.name)) {
             matches = true;
           } else if (pokemon.color.toLowerCase() == cat.toLowerCase()) {
             matches = true;

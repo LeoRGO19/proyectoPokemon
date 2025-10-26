@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/core/app_colors.dart';
+import 'package:pokedex/core/traductor.dart';
+import 'package:pokedex/core/traductor.dart';
 
 // Este widget permite seleccionar categorías para filtrar Pokémon, como generaciones, tipos, etc.
 // Maneja el estado de selección y notifica cambios vía callback.
@@ -18,99 +20,124 @@ class CategoryFilterWidget extends StatefulWidget {
 }
 
 class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
-  final Map<String, List<String>> sectionCategories = {
-    // Mapa de secciones y sus categorías.
+  final Map<String, List<CategoryFilter>> sectionCategories = {
+    // Mapa de secciones y sus categorías, cada item tiene su versión que el usuario verá en español, y otra que ocupa el sistema para filtrar
     'Generación': [
       // Sección de generaciones.
-      'generation-i',
-      'generation-ii',
-      'generation-iii',
-      'generation-iv',
-      'generation-v',
-      'generation-vi',
-      'generation-vii',
-      'generation-viii',
-      'generation-ix',
+      CategoryFilter(displayName: '1° generación', filterValue: 'generation-i'),
+      CategoryFilter(
+        displayName: '2° generación',
+        filterValue: 'generation-ii',
+      ),
+      CategoryFilter(
+        displayName: '3° generación',
+        filterValue: 'generation-iii',
+      ),
+      CategoryFilter(
+        displayName: '4° generación',
+        filterValue: 'generation-iv',
+      ),
+      CategoryFilter(displayName: '5° generación', filterValue: 'generation-v'),
+      CategoryFilter(
+        displayName: '6° generación',
+        filterValue: 'generation-vi',
+      ),
+      CategoryFilter(
+        displayName: '7° generación',
+        filterValue: 'generation-vii',
+      ),
+      CategoryFilter(
+        displayName: '8° generación',
+        filterValue: 'generation-viii',
+      ),
+      CategoryFilter(
+        displayName: '9° generación',
+        filterValue: 'generation-ix',
+      ),
     ],
     'Tipos': [
       // Sección de tipos.
-      'grass',
-      'fire',
-      'water',
-      'electric',
-      'ice',
-      'fighting',
-      'poison',
-      'ground',
-      'flying',
-      'psychic',
-      'bug',
-      'rock',
-      'ghost',
-      'dragon',
-      'dark',
-      'steel',
-      'fairy',
+      CategoryFilter(displayName: 'Planta', filterValue: 'grass'),
+      CategoryFilter(displayName: 'Fuego', filterValue: 'fire'),
+      CategoryFilter(displayName: 'Agua', filterValue: 'water'),
+      CategoryFilter(displayName: 'Eléctrico', filterValue: 'electric'),
+      CategoryFilter(displayName: 'Hielo', filterValue: 'ice'),
+      CategoryFilter(displayName: 'Lucha', filterValue: 'fighting'),
+      CategoryFilter(displayName: 'Veneno', filterValue: 'poison'),
+      CategoryFilter(displayName: 'Tierra', filterValue: 'ground'),
+      CategoryFilter(displayName: 'Volador', filterValue: 'flying'),
+      CategoryFilter(displayName: 'Psíquico', filterValue: 'psychic'),
+      CategoryFilter(displayName: 'Bicho', filterValue: 'bug'),
+      CategoryFilter(displayName: 'Roca', filterValue: 'rock'),
+      CategoryFilter(displayName: 'Fantasma', filterValue: 'ghost'),
+      CategoryFilter(displayName: 'Dragón', filterValue: 'dragon'),
+      CategoryFilter(displayName: 'Siniestro', filterValue: 'dark'),
+      CategoryFilter(displayName: 'Acero', filterValue: 'steel'),
+      CategoryFilter(displayName: 'Hada', filterValue: 'fairy'),
+      CategoryFilter(displayName: 'Normal', filterValue: 'normal'),
     ],
-    'Otros': ['Legendary', 'Mythical'], // Otros como legendarios.
+    'Otros': [
+      CategoryFilter(displayName: 'Legendario', filterValue: 'Legendary'),
+      CategoryFilter(displayName: 'Singular', filterValue: 'Mythical'),
+      CategoryFilter(displayName: 'Favorito', filterValue: 'Favorito'),
+    ], // Otros como legendarios y si son favoritos.
     'Colores': [
       // Colores de Pokémon.
-      'black',
-      'blue',
-      'brown',
-      'gray',
-      'green',
-      'pink',
-      'purple',
-      'red',
-      'white',
-      'yellow',
+      CategoryFilter(displayName: 'Negro', filterValue: 'black'),
+      CategoryFilter(displayName: 'Azul', filterValue: 'blue'),
+      CategoryFilter(displayName: 'Café', filterValue: 'brown'),
+      CategoryFilter(displayName: 'Gris', filterValue: 'gray'),
+      CategoryFilter(displayName: 'Verde', filterValue: 'green'),
+      CategoryFilter(displayName: 'Rosado', filterValue: 'pink'),
+      CategoryFilter(displayName: 'Morado', filterValue: 'purple'),
+      CategoryFilter(displayName: 'Rojo', filterValue: 'red'),
+      CategoryFilter(displayName: 'Blanco', filterValue: 'white'),
+      CategoryFilter(displayName: 'Amarillo', filterValue: 'yellow'),
     ],
     'Hábitats': [
       // Hábitats.
-      'cave',
-      'forest',
-      'grass',
-      'meadow',
-      'mountain',
-      'rough-terrain',
-      'sea',
-      'urban',
-      'waters-edge',
+      CategoryFilter(displayName: 'Caverna', filterValue: 'cave'),
+      CategoryFilter(displayName: 'Bosque', filterValue: 'forest'),
+      CategoryFilter(displayName: 'Pradera', filterValue: 'grassland'),
+      CategoryFilter(displayName: 'Montaña', filterValue: 'mountain'),
+      CategoryFilter(displayName: 'Campo', filterValue: 'rough-terrain'),
+      CategoryFilter(displayName: 'Mar', filterValue: 'sea'),
+      CategoryFilter(displayName: 'Urbano', filterValue: 'urban'),
+      CategoryFilter(displayName: 'Agua salada', filterValue: 'waters-edge'),
     ],
     'Formas': [
       // Formas corporales.
-      'ball',
-      'squiggle',
-      'fish',
-      'arms',
-      'blob',
-      'upright',
-      'legs',
-      'quadruped',
-      'wings',
-      'tentacles',
-      'heads',
-      'humanoid',
-      'bug-wings',
-      'armor',
+      CategoryFilter(displayName: 'Bola', filterValue: 'ball'),
+      CategoryFilter(displayName: 'Squiggle', filterValue: 'squiggle'),
+      CategoryFilter(displayName: 'Pez', filterValue: 'fish'),
+      CategoryFilter(displayName: 'Brazos', filterValue: 'arms'),
+      CategoryFilter(displayName: 'Blob', filterValue: 'blob'),
+      CategoryFilter(displayName: 'Bípedo', filterValue: 'upright'),
+      CategoryFilter(displayName: 'Legs', filterValue: 'legs'),
+      CategoryFilter(displayName: 'Quadrúpedo', filterValue: 'quadruped'),
+      CategoryFilter(displayName: 'Alas', filterValue: 'wings'),
+      CategoryFilter(displayName: 'Tentáculos', filterValue: 'tentacles'),
+      CategoryFilter(displayName: 'Cabezas', filterValue: 'heads'),
+      CategoryFilter(displayName: 'Humanoide', filterValue: 'humanoid'),
+      CategoryFilter(displayName: 'Bicho volador', filterValue: 'bug-wings'),
+      CategoryFilter(displayName: 'Armadura', filterValue: 'armor'),
     ],
     'Grupos de Huevos': [
       // Grupos de huevos.
-      'monster',
-      'water_1',
-      'bug',
-      'flying',
-      'field',
-      'fairy',
-      'grass',
-      'human_like',
-      'water_3',
-      'mineral',
-      'amorphous',
-      'water_2',
-      'ditto',
-      'dragon',
+      CategoryFilter(displayName: 'Monstruo', filterValue: 'monster'),
+      CategoryFilter(displayName: 'Agua 1', filterValue: 'water_1'),
+      CategoryFilter(displayName: 'Bicho', filterValue: 'bug'),
+      CategoryFilter(displayName: 'Volador', filterValue: 'flying'),
+      CategoryFilter(displayName: 'Campo', filterValue: 'field'),
+      CategoryFilter(displayName: 'Hada', filterValue: 'fairy'),
+      CategoryFilter(displayName: 'Planta', filterValue: 'plant'),
+      CategoryFilter(displayName: 'Humanoide', filterValue: 'human_like'),
+      CategoryFilter(displayName: 'Agua 3', filterValue: 'water_3'),
+      CategoryFilter(displayName: 'Mineral', filterValue: 'mineral'),
+      CategoryFilter(displayName: 'Amorfo', filterValue: 'amorphous'),
+      CategoryFilter(displayName: 'Agua 2', filterValue: 'water_2'),
+      CategoryFilter(displayName: 'Ditto', filterValue: 'ditto'),
+      CategoryFilter(displayName: 'Dragón', filterValue: 'dragon'),
     ],
   };
   final Set<String> _selectedCategories =
@@ -183,10 +210,12 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
     return ListView(
       // ListView para secciones.
       shrinkWrap: true, // Se ajusta al contenido.
-      children: sectionCategories.entries.map((entry) {
+      children: sectionCategories.entries.map((
+        MapEntry<String, List<CategoryFilter>> entry,
+      ) {
         // Mapea cada sección.
         final sectionTitle = entry.key; // Título de sección.
-        final cats = entry.value; // Lista de categorías.
+        final List<CategoryFilter> cats = entry.value; // Lista de categorías.
         return Column(
           // Columna por sección.
           crossAxisAlignment:
@@ -209,10 +238,10 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
               spacing: 10.0, // Espacio horizontal.
               runSpacing: 5.0, // Espacio vertical.
               alignment: WrapAlignment.start, // Alinea al inicio.
-              children: cats.map((category) {
+              children: cats.map((CategoryFilter category) {
                 // Mapea cada categoría.
                 final isSelected = _selectedCategories.contains(
-                  category,
+                  category.filterValue,
                 ); // Verifica si seleccionada.
                 return SizedBox(
                   // Tamaño fijo para cada item.
@@ -222,7 +251,7 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
                   child: CheckboxListTile(
                     // Tile con checkbox.
                     title: Text(
-                      category,
+                      category.displayName,
                       style: TextStyles.cardText,
                     ), // Título de categoría.
                     value: isSelected, // Valor del checkbox.
@@ -234,9 +263,13 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
                           // Actualiza estado.
                           if (value) {
                             // Si seleccionado.
-                            _selectedCategories.add(category); // Agrega.
+                            _selectedCategories.add(
+                              category.filterValue,
+                            ); // Agrega.
                           } else {
-                            _selectedCategories.remove(category); // Remueve.
+                            _selectedCategories.remove(
+                              category.filterValue,
+                            ); // Remueve.
                           }
                         });
                         if (widget.onFilterChanged != null) {
