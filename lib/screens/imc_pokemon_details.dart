@@ -7,6 +7,9 @@ import 'package:pokedex/core/text_styles.dart';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/components/characteristic_widget.dart';
 import 'package:pokedex/components/pokedex_components/stats_chart_widget.dart';
+import 'package:provider/provider.dart';
+import 'package:pokedex/data/favoriteWatcher.dart';
+import 'package:pokedex/screens/fav.dart';
 
 // Pantalla principal de detalles de Pokémon.
 // Esta pantalla carga y muestra detalles detallados de un Pokémon específico.
@@ -43,6 +46,40 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   String _category = ''; // Categoría (genus).
   bool _isLoading = true; // Flag de carga.
   String _error = ''; // Mensaje de error.
+  //mapa con traducciones de tipo para utilizar al mostrarlas en la descripción del pokémon
+  // hacemos esto de forma manual en vez de pedir este dato ya traducido desde la opkeapi porque eso consume AÚN más recursos
+  static const Map<String, String> traduccionesTipo = {
+    'grass': 'Planta',
+    'fire': 'Fuego',
+    'water': 'Agua',
+    'electric': 'Eléctrico',
+    'ice': 'Hielo',
+    'fighting': 'Lucha',
+    'poison': 'Veneno',
+    'ground': 'Tierra',
+    'flying': 'Volador',
+    'psychic': 'Psíquico',
+    'bug': 'Bicho',
+    'rock': 'Roca',
+    'ghost': 'Fantasma',
+    'dragon': 'Dragón',
+    'dark': 'Siniestro',
+    'steel': 'Acero',
+    'fairy': 'Hada',
+    'normal': 'Normal',
+  };
+  //mapa que permite la traducción de las generaciones de pokémon
+  static const Map<String, String> tradGen = {
+    'generation-i': '1° generación',
+    'generation-ii': '2° generación',
+    'generation-iii': '3° generación',
+    'generation-iv': '4° generación',
+    'generation-v': '5° generación',
+    'generation-vi': '6° generación',
+    'generation-vii': '7° generación',
+    'generation-viii': '8° generación',
+    'generation-ix': '9° generación',
+  };
 
   @override
   void initState() {
@@ -101,6 +138,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
         orElse: () => {'genus': 'No disponible'},
       )['genus']; // Genus o default.
 
+      if (!mounted) return; //chequea que sea visible, si no sale
+
       setState(() {
         // Actualiza estado.
         _details = details; // Asigna detalles.
@@ -116,6 +155,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
         _isLoading = false; // Fin de carga.
       });
     } catch (e) {
+      if (!mounted) return; //chequea que sea visible, si no sale
+
       // Catch error.
       setState(() {
         // Actualiza con error.
@@ -171,18 +212,27 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                       // Contenedor título.
                       height: titleHeight, // Altura calculada.
                       width: double.infinity, // Ancho full.
-                      color: Color.fromRGBO(0, 0, 0, 1), // Negro.
-                      child: Center(
+                      color: AppColors.fontoTituloDetalle, // Negro.
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         // Centra texto.
-                        child: Text(
-                          // Texto ID y nombre.
-                          '#${_details['id']} ${widget.pokemon.name.toUpperCase()}',
-                          style: TextStyles.bodyText.copyWith(
-                            // Estilo con color blanco y size 24.
-                            color: const Color.fromARGB(255, 255, 255, 255),
-                            fontSize: 24,
+                        children: [
+                          Text(
+                            // Texto ID y nombre.
+                            '#${_details['id']} ${widget.pokemon.name.toUpperCase()}',
+                            style: TextStyles.bodyText.copyWith(
+                              // Estilo con color blanco y size 24.
+                              color: const Color.fromARGB(255, 255, 255, 255),
+                              fontSize: 24,
+                            ),
                           ),
-                        ),
+                          //se agrega  botón para marcar como favorito
+                          SizedBox(
+                            width: titleHeight,
+                            height: titleHeight,
+                            child: BotonFavorito(pokemon: widget.pokemon),
+                          ),
+                        ],
                       ),
                     ),
                     Expanded(
@@ -289,7 +339,23 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                                   // Card clickable.
                                                   child: InkWell(
                                                     // Para tap.
-                                                    onTap: () {
+                                                    onTap: () async {
+                                                      // navega a detalles de evolución
+                                                      await Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              PokemonDetailScreen(
+                                                                pokemon: Pokemon(
+                                                                  name:
+                                                                      evolution['name'],
+                                                                  url:
+                                                                      evolution['url'],
+                                                                ),
+                                                              ),
+                                                        ),
+                                                      );
+                                                      /*onTap: () {
                                                       // Navega a detalles de evolución.
                                                       Navigator.push(
                                                         context,
@@ -304,7 +370,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                                                 ),
                                                               ),
                                                         ),
-                                                      );
+                                                      );*/
                                                     },
                                                     child: Column(
                                                       // Columna imagen y texto.
@@ -415,14 +481,24 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   CharacteristicWidget(
                     title: 'Tipo:',
                     value: _types.isNotEmpty
-                        ? _types.join(', ').toUpperCase()
+                        //? _types.join(', ').toUpperCase()
+                        ? _types
+                              .map(
+                                (t) =>
+                                    traduccionesTipo[t.toLowerCase()] ??
+                                    t, //traduce los tipos
+                              )
+                              .join(', ')
+                              .toUpperCase()
                         : 'No disponible',
                     backgroundColor: AppColors.primary,
                   ),
                   CharacteristicWidget(
                     title: 'Generación:',
                     value: _generation.isNotEmpty
-                        ? _generation
+                        //? _generation
+                        ? (tradGen[_generation.toLowerCase()] ??
+                              _generation) //traduce la generación
                         : 'No disponible',
                     backgroundColor: AppColors.secondary,
                   ),
@@ -446,7 +522,15 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   CharacteristicWidget(
                     title: 'Debilidades:',
                     value: _weaknesses.isNotEmpty
-                        ? _weaknesses.join(', ').toUpperCase()
+                        //? _weaknesses.join(', ').toUpperCase()
+                        ? _weaknesses
+                              .map(
+                                (t) =>
+                                    traduccionesTipo[t.toLowerCase()] ??
+                                    t, //traduce debilidades
+                              )
+                              .join(', ')
+                              .toUpperCase()
                         : 'No disponible',
                     backgroundColor: AppColors.secondary,
                   ),

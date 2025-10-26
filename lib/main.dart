@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/screens/menu_principal.dart';
+import 'package:provider/provider.dart';
+import 'package:pokedex/data/favoriteWatcher.dart';
 
-void main() {
-  runApp(const MainApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => FavoritesProvider(),
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
