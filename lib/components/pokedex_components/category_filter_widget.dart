@@ -103,7 +103,7 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
       CategoryFilter(displayName: 'Campo', filterValue: 'rough-terrain'),
       CategoryFilter(displayName: 'Mar', filterValue: 'sea'),
       CategoryFilter(displayName: 'Urbano', filterValue: 'urban'),
-      CategoryFilter(displayName: 'Agua salada', filterValue: 'waters-edge'),
+      CategoryFilter(displayName: 'Ríos/Lagos', filterValue: 'waters-edge'),
     ],
     'Formas': [
       // Formas corporales.
