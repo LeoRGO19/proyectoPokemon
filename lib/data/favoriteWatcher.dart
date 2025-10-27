@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /*clase que sirve para notificar a todos los listeners asociados que un pokémon fue agregado o removido de favoritos, 

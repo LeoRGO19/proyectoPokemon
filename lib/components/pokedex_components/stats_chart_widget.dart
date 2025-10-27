@@ -30,8 +30,8 @@ class StatsChartWidget extends StatelessWidget {
         // Genera por cada stat.
         final value = statValues[index]; // Valor actual.
         final color = index % 2 == 0
-            ? AppColors.secondary
-            : AppColors.primary; // Alterna colores.
+            ? AppColors.chart1
+            : AppColors.chart2; // Alterna colores.
         return Padding(
           // Padding vertical para cada row.
           padding: const EdgeInsets.symmetric(

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/core/traductor.dart';
-import 'package:pokedex/core/traductor.dart';
 
 // Este widget permite seleccionar categorías para filtrar Pokémon, como generaciones, tipos, etc.
 // Maneja el estado de selección y notifica cambios vía callback.
@@ -22,6 +21,12 @@ class CategoryFilterWidget extends StatefulWidget {
 class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
   final Map<String, List<CategoryFilter>> sectionCategories = {
     // Mapa de secciones y sus categorías, cada item tiene su versión que el usuario verá en español, y otra que ocupa el sistema para filtrar
+    'Otros': [
+      CategoryFilter(displayName: 'Legendario', filterValue: 'Legendary'),
+      CategoryFilter(displayName: 'Singular', filterValue: 'Mythical'),
+      CategoryFilter(displayName: 'Favorito', filterValue: 'Favorito'),
+    ], // Otros como legendarios y si son favoritos.
+
     'Generación': [
       // Sección de generaciones.
       CategoryFilter(displayName: '1° generación', filterValue: 'generation-i'),
@@ -76,11 +81,6 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
       CategoryFilter(displayName: 'Hada', filterValue: 'fairy'),
       CategoryFilter(displayName: 'Normal', filterValue: 'normal'),
     ],
-    'Otros': [
-      CategoryFilter(displayName: 'Legendario', filterValue: 'Legendary'),
-      CategoryFilter(displayName: 'Singular', filterValue: 'Mythical'),
-      CategoryFilter(displayName: 'Favorito', filterValue: 'Favorito'),
-    ], // Otros como legendarios y si son favoritos.
     'Colores': [
       // Colores de Pokémon.
       CategoryFilter(displayName: 'Negro', filterValue: 'black'),
@@ -103,7 +103,7 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
       CategoryFilter(displayName: 'Campo', filterValue: 'rough-terrain'),
       CategoryFilter(displayName: 'Mar', filterValue: 'sea'),
       CategoryFilter(displayName: 'Urbano', filterValue: 'urban'),
-      CategoryFilter(displayName: 'Agua salada', filterValue: 'waters-edge'),
+      CategoryFilter(displayName: 'Ríos/Lagos', filterValue: 'waters-edge'),
     ],
     'Formas': [
       // Formas corporales.

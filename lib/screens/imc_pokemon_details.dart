@@ -7,9 +7,7 @@ import 'package:pokedex/core/text_styles.dart';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/components/characteristic_widget.dart';
 import 'package:pokedex/components/pokedex_components/stats_chart_widget.dart';
-import 'package:provider/provider.dart';
-import 'package:pokedex/data/favoriteWatcher.dart';
-import 'package:pokedex/screens/fav.dart';
+import 'package:pokedex/components/pokedex_components/fav.dart';
 
 // Pantalla principal de detalles de Pokémon.
 // Esta pantalla carga y muestra detalles detallados de un Pokémon específico.
@@ -46,6 +44,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   String _category = ''; // Categoría (genus).
   bool _isLoading = true; // Flag de carga.
   String _error = ''; // Mensaje de error.
+  String _habitat = ''; // Habitat.
   //mapa con traducciones de tipo para utilizar al mostrarlas en la descripción del pokémon
   // hacemos esto de forma manual en vez de pedir este dato ya traducido desde la opkeapi porque eso consume AÚN más recursos
   static const Map<String, String> traduccionesTipo = {
@@ -132,6 +131,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
         },
       )['ability']['name']; // Nombre o default.
       final genera = speciesData['genera'] as List; // Genera list.
+      final habitatData = speciesData['habitat'];
+      final habitat = habitatData != null ? habitatData['name'] : 'unknown';
       final category = genera.firstWhere(
         // Encuentra en 'es'.
         (entry) => entry['language']['name'] == 'es',
@@ -152,6 +153,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
         _height = height.toStringAsFixed(1); // Altura string.
         _mainAbility = mainAbility.toUpperCase(); // Habilidad upper.
         _category = category; // Categoría.
+        _habitat = habitat; // Guarda hábitat.
         _isLoading = false; // Fin de carga.
       });
     } catch (e) {
@@ -380,7 +382,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                                       children: [
                                                         Image.network(
                                                           // Imagen network.
-                                                          'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png',
+                                                          'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png',
                                                           width:
                                                               MediaQuery.of(
                                                                 context,
@@ -543,37 +545,58 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     );
   }
 
+  // Imagenes para los fondos dependiendo del habitat.
+  static const Map<String, String> habitatImages = {
+    'forest': 'assets/images/habitats/forest.png',
+    'cave': 'assets/images/habitats/cave.png',
+    'mountain': 'assets/images/habitats/mountain.png',
+    'grassland': 'assets/images/habitats/grassland.png',
+    'sea': 'assets/images/habitats/sea.png',
+    'rough-terrain': 'assets/images/habitats/rough.png',
+    'urban': 'assets/images/habitats/urban.png',
+    'waters-edge': 'assets/images/habitats/waters_edge.png',
+    'rare': 'assets/images/habitats/rare.png',
+  };
+
   Expanded gifOrImg(double availableHeight) {
+    final habitatImage = habitatImages[_habitat] ?? habitatImages['unknown']!;
     return Expanded(
       // Expande.
       child: Padding(
         // Padding imagen.
-        padding: const EdgeInsets.all(8.0), // All.
-        child: Image.network(
-          // Imagen network animada.
-          _details['sprites']['versions']['generation-v']['black-white']['animated']['front_default'] ??
-              'https://via.placeholder.com/150', // URL o placeholder.
-          height: availableHeight * 0.35, // Altura proporcional.
-          fit: BoxFit.contain, // Contiene.
-          // Si falla imagen animada, fallback a estática, pero si falla estática, asset local.
-          errorBuilder: (context, error, stackTrace) {
-            // Manejo error.
-            // Fallback a la imagen estática si el sprite animado falla
-            final staticUrl =
-                'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${_details['id']}.png'; // URL estática.
-            return Image.network(
-              staticUrl, // Carga estática.
-              height: availableHeight * 0.35, // Altura.
+        padding: const EdgeInsets.all(8.0),
+        child: Stack(
+          // Stack de imagen
+          alignment: Alignment.center,
+          children: [
+            // Fondo del hábitat
+            Positioned.fill(
+              child: Image.asset(habitatImage, fit: BoxFit.cover),
+            ),
+            // Sprite del Pokémon encima
+            Image.network(
+              _details['sprites']['other']['showdown']['front_default'] ??
+                  'https://via.placeholder.com/150', // URL o placeholder.
+              height: availableHeight * 0.35,
               fit: BoxFit.contain, // Contiene.
+              // Si falla imagen animada, fallback a estática, pero si falla estática, asset local.
               errorBuilder: (context, error, stackTrace) {
-                // Otro error.
-                // Si falla la imagen estática, usa el placeholder local
-                return Image.asset(
-                  'assets/images/errorApiVisual.png', // Asset local.
+                // Manejo error.
+                // Fallback a la imagen estática si el sprite animado falla
+                final staticUrl =
+                    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${_details['id']}.png';
+                return Image.network(
+                  staticUrl, // Carga estática.
+                  height: availableHeight * 0.35, // Altura.
+                  fit: BoxFit.contain, // Contiene.
+                  errorBuilder: (context, error, stackTrace) {
+                    // Si falla la imagen estática, usa el placeholder local
+                    return Image.asset('assets/images/errorApiVisual.png');
+                  },
                 );
               },
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
