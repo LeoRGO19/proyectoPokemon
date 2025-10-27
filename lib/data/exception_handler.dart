@@ -1,5 +1,7 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:pokedex/exceptions/exceptions.dart';
 
 class ExceptionHandler {
@@ -7,7 +9,7 @@ class ExceptionHandler {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
-  static void handle(Object error) {
+  static String handle(Object error) {
     log("Error detectado: $error");
 
     String title = "Error";
@@ -26,11 +28,17 @@ class ExceptionHandler {
       title = "NullPokemon";
       message = "Error al crear el Pokémon.";
       debugPrint("Error al recibir datos de Pokemon");
+    } else if (error is SocketException || error is ClientException) {
+      title = "NoConnection";
+      message = "Revisa tu conexion a Internet.";
+      debugPrint("Sin conexión a internet");
     }
-    _showErrorDialog(title, message);
+
+    return message;
+    //_showErrorDialog(title, message);
   }
 
-  static void _showErrorDialog(String title, String message) {
+  /*static void _showErrorDialog(String title, String message) {
     final context = navigatorKey.currentState?.overlay?.context;
     if (context == null) {
       debugPrint("No hay context");
@@ -51,5 +59,5 @@ class ExceptionHandler {
         ],
       ),
     );
-  }
+  }*/
 }
