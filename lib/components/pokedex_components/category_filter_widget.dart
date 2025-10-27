@@ -21,6 +21,12 @@ class CategoryFilterWidget extends StatefulWidget {
 class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
   final Map<String, List<CategoryFilter>> sectionCategories = {
     // Mapa de secciones y sus categorías, cada item tiene su versión que el usuario verá en español, y otra que ocupa el sistema para filtrar
+    'Otros': [
+      CategoryFilter(displayName: 'Legendario', filterValue: 'Legendary'),
+      CategoryFilter(displayName: 'Singular', filterValue: 'Mythical'),
+      CategoryFilter(displayName: 'Favorito', filterValue: 'Favorito'),
+    ], // Otros como legendarios y si son favoritos.
+
     'Generación': [
       // Sección de generaciones.
       CategoryFilter(displayName: '1° generación', filterValue: 'generation-i'),
@@ -75,11 +81,6 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
       CategoryFilter(displayName: 'Hada', filterValue: 'fairy'),
       CategoryFilter(displayName: 'Normal', filterValue: 'normal'),
     ],
-    'Otros': [
-      CategoryFilter(displayName: 'Legendario', filterValue: 'Legendary'),
-      CategoryFilter(displayName: 'Singular', filterValue: 'Mythical'),
-      CategoryFilter(displayName: 'Favorito', filterValue: 'Favorito'),
-    ], // Otros como legendarios y si son favoritos.
     'Colores': [
       // Colores de Pokémon.
       CategoryFilter(displayName: 'Negro', filterValue: 'black'),
