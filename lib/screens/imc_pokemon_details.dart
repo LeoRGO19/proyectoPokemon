@@ -191,7 +191,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           : _error
                 .isNotEmpty // Si error.
           ? Center(
-              child: Text("Error: $_error", style: TextStyles.bodyText),
+              child: Text("Error: $_error", style: TextStyles.errorText),
             ) // Mensaje error.
           : LayoutBuilder(
               // Builder para constraints responsive.
@@ -556,6 +556,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     'urban': 'assets/images/habitats/urban.png',
     'waters-edge': 'assets/images/habitats/waters_edge.png',
     'rare': 'assets/images/habitats/rare.png',
+    'unknown': 'assets/images/habitats/rare.png',
   };
 
   Expanded gifOrImg(double availableHeight) {
