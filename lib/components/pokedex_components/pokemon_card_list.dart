@@ -47,7 +47,7 @@ class PokemonCardList extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       itemCount: pokemons.length + (isLoading ? 1 : 0), // Count + loading.
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4, // 4 columnas.
+        crossAxisCount: 6, // 6 columnas.
         crossAxisSpacing: 8.0,
         mainAxisSpacing: 8.0,
         childAspectRatio: 0.65,
@@ -58,10 +58,10 @@ class PokemonCardList extends StatelessWidget {
           final pokemon = pokemons[index];
           final id = pokemon.url.split("/")[6];
           final imageUrl =
-              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png";
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"; // Arte con mejor calidad.
 
           return Card(
-            elevation: 7.0,
+            elevation: 3.0,
             shape: RoundedRectangleBorder(
               // Shape redondeado.
               borderRadius: BorderRadius.circular(10.0),
@@ -89,8 +89,8 @@ class PokemonCardList extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.0),
                     child: Image.network(
                       imageUrl,
-                      width: 200.0,
-                      height: 200.0,
+                      width: 150.0,
+                      height: 150.0,
                       fit: BoxFit.contain,
                       loadingBuilder: (context, child, progress) {
                         if (progress == null) return child;

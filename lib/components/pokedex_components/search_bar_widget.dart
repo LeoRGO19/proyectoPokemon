@@ -1,5 +1,6 @@
 // components/pokedex_components/search_bar_widget.dart
 import 'package:flutter/material.dart';
+import 'package:pokedex/core/app_colors.dart';
 
 // Este widget representa una barra de búsqueda simple para filtrar Pokémon.
 // No maneja errores en la UI; si el onChanged falla, no se muestra nada al usuario.
@@ -35,12 +36,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     // Construye la UI del widget.
     return Container(
       // Contenedor principal con color de fondo.
-      color: Color.fromARGB(
-        255,
-        230,
-        230,
-        230,
-      ), // Color gris claro para el fondo.
+      color: AppColors.primary,
       child: Padding(
         // Padding alrededor del TextField.
         padding: const EdgeInsets.all(

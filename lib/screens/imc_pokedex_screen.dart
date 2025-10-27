@@ -413,6 +413,7 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Pokédex', style: TextStyles.bodyText),
+        backgroundColor: AppColors.backgroundComponentSelected,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
