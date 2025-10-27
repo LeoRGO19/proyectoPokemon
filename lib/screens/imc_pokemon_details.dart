@@ -7,8 +7,6 @@ import 'package:pokedex/core/text_styles.dart';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/components/characteristic_widget.dart';
 import 'package:pokedex/components/pokedex_components/stats_chart_widget.dart';
-import 'package:provider/provider.dart';
-import 'package:pokedex/data/favoriteWatcher.dart';
 import 'package:pokedex/screens/fav.dart';
 
 // Pantalla principal de detalles de Pokémon.
