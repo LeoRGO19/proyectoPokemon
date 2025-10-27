@@ -194,8 +194,40 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           : _error
                 .isNotEmpty // Si error.
           ? Center(
-              child: Text("Error: $_error", style: TextStyles.errorText),
-            ) // Mensaje error.
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _error,
+                    style: TextStyles.errorText,
+                    textAlign: TextAlign.center,
+                  ), // Mensaje error.
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.home),
+                    label: const Text("Volver al Menú Principal"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary, // Blanco.
+                      foregroundColor: AppColors.accent,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      textStyle: const TextStyle(fontSize: 16),
+                    ),
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MenuPrincipal(),
+                        ),
+                        (Route<dynamic> route) => false,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            )
           : LayoutBuilder(
               // Builder para constraints responsive.
               builder: (context, constraints) {
@@ -227,7 +259,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                             '#${_details['id']} ${widget.pokemon.name.toUpperCase()}',
                             style: TextStyles.bodyText.copyWith(
                               // Estilo con color blanco y size 24.
-                              color: const Color.fromARGB(255, 255, 255, 255),
+                              color: Colors.white,
                               fontSize: 24,
                             ),
                           ),
@@ -266,12 +298,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                     // Contenedor blanco.
                                     height:
                                         availableHeight * 0.60, // 60% altura.
-                                    color: const Color.fromARGB(
-                                      255,
-                                      255,
-                                      255,
-                                      255,
-                                    ), // Blanco.
+                                    color: Colors.white, // Blanco.
                                     child: Row(
                                       // Row para stats e imagen.
                                       children: [
@@ -297,55 +324,38 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                     height:
                                         availableHeight *
                                         0.30, // 30% altura (nota: original 0.30, pero sumaba a 0.90, falta 0.10?).
-                                    color: const Color.fromARGB(
-                                      255,
-                                      255,
-                                      255,
-                                      255,
-                                    ), // Blanco.
+                                    color: Colors.white,
                                     child: Column(
                                       // Columna para título y list.
                                       crossAxisAlignment: CrossAxisAlignment
                                           .start, // Izquierda.
                                       children: [
-                                        Padding(
+                                        const Padding(
                                           // Padding título.
-                                          padding: const EdgeInsets.all(
-                                            8.0,
-                                          ), // All.
+                                          padding: EdgeInsets.all(8.0), // All.
                                           child: Text(
                                             'Evoluciones:',
-                                            style:
-                                                TextStyles.bodyText, // Estilo.
+                                            style: TextStyles.bodyText,
                                           ),
                                         ),
                                         Expanded(
-                                          // Expande listview.
                                           child: ListView.builder(
-                                            // Builder horizontal.
-                                            scrollDirection:
-                                                Axis.horizontal, // Horizontal.
-                                            itemCount:
-                                                _evolutions.length, // Count.
+                                            scrollDirection: Axis.horizontal,
+                                            itemCount: _evolutions.length,
                                             itemBuilder: (context, index) {
-                                              // Builder.
                                               final evolution =
-                                                  _evolutions[index]; // Evolución actual.
+                                                  _evolutions[index];
                                               final id = evolution['url'].split(
                                                 '/',
-                                              )[6]; // ID de URL.
+                                              )[6];
                                               return Padding(
-                                                // Padding horizontal.
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                      horizontal: 4.0,
-                                                    ), // Espacio.
+                                                      horizontal: 4,
+                                                    ),
                                                 child: Card(
-                                                  // Card clickable.
                                                   child: InkWell(
-                                                    // Para tap.
                                                     onTap: () async {
-                                                      // navega a detalles de evolución
                                                       await Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
@@ -360,37 +370,19 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                                               ),
                                                         ),
                                                       );
-                                                      /*onTap: () {
-                                                      // Navega a detalles de evolución.
-                                                      Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              PokemonDetailScreen(
-                                                                pokemon: Pokemon(
-                                                                  name:
-                                                                      evolution['name'],
-                                                                  url:
-                                                                      evolution['url'],
-                                                                ),
-                                                              ),
-                                                        ),
-                                                      );*/
                                                     },
                                                     child: Column(
-                                                      // Columna imagen y texto.
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
                                                               .center, // Centro.
                                                       children: [
                                                         Image.network(
-                                                          // Imagen network.
                                                           'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png',
                                                           width:
                                                               MediaQuery.of(
                                                                 context,
                                                               ).size.width *
-                                                              0.1, // Ancho proporcional.
+                                                              0.1,
                                                           height:
                                                               availableHeight *
                                                               0.1, // Altura.
@@ -407,7 +399,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                                           evolution['name']
                                                               .toUpperCase(), // Nombre upper.
                                                           style: TextStyles
-                                                              .cardText, // Estilo.
+                                                              .cardText,
                                                         ),
                                                       ],
                                                     ),
@@ -424,7 +416,6 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                               ],
                             ),
                           ),
-                          // Columna derecha: 50% ancho, todas las características visibles
                           characteristics(),
                         ],
                       ),

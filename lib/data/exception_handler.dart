@@ -15,24 +15,27 @@ class ExceptionHandler {
     String title = "Error";
     String message = "Ocurrio un error.";
 
-    // logs extras, por si acaso.
+    // Modificacion del mensaje de error por cada Exception.
     if (error is ApiOfflineException) {
       title = "ApiOffline";
-      message = "La API no se encuentra disponible.";
+      message = "ApiOffline: La API no se encuentra disponible.";
       debugPrint("API sin conexión");
-    } else if (error is NoConnectionException) {
+    } // La API se encuentra offline.
+    else if (error is NoConnectionException) {
       title = "NoConnection";
       message = "Revisa tu conexion a Internet.";
-      debugPrint("Sin conexión a internet");
-    } else if (error is NullPokemonException) {
+      debugPrint("NoConnection: Sin conexión a internet");
+    } // No hay Conexion a Internet.
+    else if (error is NullPokemonException) {
       title = "NullPokemon";
       message = "Error al crear el Pokémon.";
-      debugPrint("Error al recibir datos de Pokemon");
-    } else if (error is SocketException || error is ClientException) {
+      debugPrint("NullPokemon: Error al recibir datos de Pokemon");
+    } // Pokemon Nulo recibido.
+    else if (error is SocketException || error is ClientException) {
       title = "NoConnection";
-      message = "Revisa tu conexion a Internet.";
+      message = "NoConnection: Revisa tu conexion a Internet.";
       debugPrint("Sin conexión a internet");
-    }
+    } // Sin Conexion a Internet de parte del Client.
 
     return message;
     //_showErrorDialog(title, message);
