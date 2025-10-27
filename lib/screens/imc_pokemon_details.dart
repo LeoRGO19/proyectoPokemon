@@ -198,7 +198,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Error: $_error",
+                    _error,
                     style: TextStyles.errorText,
                     textAlign: TextAlign.center,
                   ), // Mensaje error.
