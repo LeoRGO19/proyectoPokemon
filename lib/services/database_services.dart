@@ -68,7 +68,8 @@ class DatabaseService {
       await db.insert(
         _pokemonTableName,
         pok.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
+        conflictAlgorithm:
+            ConflictAlgorithm.replace, //reemplaza si encuentra datos
       );
     }
   }
@@ -83,7 +84,7 @@ class DatabaseService {
   }
 
   //chequea que los 1025 pokémon que mostramos se hayan cargado correctamente
-  Future<bool> checkData() async {
+  Future<int> checkData() async {
     const expectedCount = 1025;
     final db = await database;
 
@@ -96,16 +97,17 @@ class DatabaseService {
       print(
         'Database incompleta: $actualCount / $expectedCount Pokémon guardados.',
       );
-      await clearTable(_pokemonTableName); // vacía la tabla
-      return false;
+      //await clearTable(_pokemonTableName); // vacía la tabla
+      return actualCount;
     }
 
     print('Todos los $actualCount Pokémon fueron guardados exitosamente!');
-    return true;
+    return actualCount;
   }
 
   Future<void> clearTable(String tableName) async {
     final db = await database;
     await db.delete(tableName);
+    print("Base de datos borrada");
   }
 }

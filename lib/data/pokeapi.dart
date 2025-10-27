@@ -2,9 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/data/pokemon.dart';
 import 'dart:isolate';
-import "package:pokedex/services/database_services.dart";
-import 'dart:io';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 // Clase para interactuar con PokeAPI.
 // Proporciona métodos para fetch listas, detalles, evoluciones, etc.
@@ -23,25 +20,12 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 class PokeApi {
   static const Duration _timeoutDuration = Duration(seconds: 30);
 
-  static final DatabaseService _databaseService = DatabaseService.instance;
-
   static Future<List<Pokemon>> fetchAllPokemonInIsolate({
     // Fetch batch en Isolate.
     required int limit,
     required int offset,
     required SendPort sendPort, // Port para resultado.
   }) async {
-    if (Platform.isWindows || Platform.isLinux) {
-      //crea base de datos correctamente
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
-    }
-    if (await _databaseService.checkData()) {
-      //si la base de datos tiene cosas cargadas, ocupa eso en vez de llamar a la api
-      final existing = await _databaseService.getPokemon();
-      sendPort.send(existing);
-      return existing;
-    }
     try {
       final url = Uri.parse(
         'https://pokeapi.co/api/v2/pokemon?limit=$limit&offset=$offset',
@@ -62,7 +46,6 @@ class PokeApi {
           basicPokemons.map((p) => fetchPokemonDetails(p, client)).toList(),
         );
 
-        _databaseService.addPokemon(detailedPokemons);
         sendPort.send(detailedPokemons); // Envía lista.
         client.close(); // Cierra.
         return detailedPokemons;
