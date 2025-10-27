@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex/data/exception_handler.dart';
 import 'package:pokedex/data/pokeapi.dart';
 import 'package:pokedex/data/pokemon.dart';
+//import 'package:pokedex/exceptions/exceptions.dart';
 import 'package:pokedex/screens/menu_principal.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/core/text_styles.dart';
@@ -159,10 +161,11 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     } catch (e) {
       if (!mounted) return; //chequea que sea visible, si no sale
 
+      final String handledError = ExceptionHandler.handle(e);
       // Catch error.
       setState(() {
         // Actualiza con error.
-        _error = e.toString(); // Mensaje.
+        _error = handledError; // Mensaje.
         _isLoading = false; // Fin carga.
       });
     }
