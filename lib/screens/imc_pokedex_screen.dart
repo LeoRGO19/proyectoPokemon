@@ -111,7 +111,7 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
     final int dataSaved = await db
         .checkData(); //si es que los pokemon estan en la base de datos los carga desde ahí y no desde la PokeApi
     if (dataSaved == 1025 && _offset == 0) {
-      print('Todos los pokémon están en la base de datos, subiendo...');
+      debugPrint('Todos los pokémon están en la base de datos, subiendo...');
       final saved = await db.getPokemon();
       setState(() {
         _allPokemons.clear(); //me aseguro de no subir dos veces
@@ -298,7 +298,9 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
       _selectedCategories = selected;
       _filterMode = mode;
       _filteredPokemons.clear();
-      print('Filtros seleccionados: $_selectedCategories, Modo: $_filterMode');
+      debugPrint(
+        'Filtros seleccionados: $_selectedCategories, Modo: $_filterMode',
+      );
     });
 
     final targetId = _calculateTargetId(selected); // Calcula target.
@@ -384,7 +386,9 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
       _filteredPokemons.addAll(
         hasFilters ? results : _allPokemons,
       ); // Agrega filtered o all.
-      print('Pokémon filtrados: ${_filteredPokemons.length}'); // Print debug.
+      debugPrint(
+        'Pokémon filtrados: ${_filteredPokemons.length}',
+      ); // Print debug.
     });
 
     // Auto-carga si la lista filtrada es pequeña y hay más por cargar
