@@ -16,4 +16,9 @@ class TextStyles {
     fontSize: 12,
     fontWeight: FontWeight.w800,
   );
+  static const TextStyle errorText = TextStyle(
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: FontWeight.w800,
+  );
 }
