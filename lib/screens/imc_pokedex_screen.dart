@@ -169,7 +169,7 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
               _applyFilters(); //permite que pokémon se vean
               for (var pokemon in isolateResult) {
                 // Print debug.
-                print(
+                debugPrint(
                   'Pokémon: ${pokemon.name}, Generación: ${pokemon.generation}',
                 );
               }
