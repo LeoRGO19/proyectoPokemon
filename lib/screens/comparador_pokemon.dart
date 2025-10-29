@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/data/pokemon.dart';
+import 'package:pokedex/screens/Resultado_comparar.dart';
 import 'package:pokedex/services/database_services.dart';
 
 class ComparadorPokemonState extends StatefulWidget {
@@ -133,7 +134,6 @@ class _ComparadorPokemonState extends State<ComparadorPokemonState> {
 
                 const SizedBox(height: 30),
 
-                /*
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -144,7 +144,7 @@ class _ComparadorPokemonState extends State<ComparadorPokemonState> {
                     );
                   },
                   child: Text("Comparar", style: TextStyles.menuText),
-                ),*/
+                ),
               ],
             );
           },
