@@ -1,5 +1,9 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:pokedex/core/app_colors.dart';
+import 'package:pokedex/core/text_styles.dart';
+import 'package:pokedex/data/pokemon.dart';
+import 'package:pokedex/screens/comparador_pokemon.dart';
+import 'dart:math';
 import 'package:pokedex/components/pokedex_components/search_bar_widget.dart';
 import 'package:pokedex/components/pokedex_components/category_filter_widget.dart';
 import 'package:pokedex/components/pokedex_components/pokemon_card_list.dart';
@@ -10,36 +14,24 @@ import 'package:pokedex/core/app_colors.dart';
 import 'dart:isolate';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/data/favoriteWatcher.dart';
-import 'package:pokedex/screens/imc_pokemon_details.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/services/database_services.dart';
 import 'dart:io';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-// Pantalla principal de la Pokédex, muestra lista filtrable de Pokémon.
-// Funciona cargando Pokémon en batches usando Isolates para no bloquear UI, con infinite scroll.
-// Lista todos los Pokémon hasta ID 1025, con filtros por búsqueda y categorías.
-// Cómo funciona: initState carga inicial, listener en scroll para más. _fetchPokemons usa Isolate para fetch batch, luego aplica filtros.
-// Filtros: Búsqueda por nombre/ID (con fetch específico si exacto), categorías con AND/OR.
-
-// Maneja errores en debugPrint, pero no en UI (usuario no ve si falla fetch). Timeout en PokeApi, pero no retry.
-// Hay un pequeño error que es que el scroll de las categorías es difícil de ver
-// Falta: Manejo de errores en UI (error cargando, retry, o lo que se quiera agregar).
-
-// este bloque se podría optimizar si se quiere en un futuro, pero en función del tiempo ahora mismo es dificil:
-// No se usa (era parte de lógica antigua pero sin embargo podría ser util): _specificSearch y _targetSearchId se setean pero no siempre usan; auto-carga si <5 pero podría loop si siempre <5.
-// Limita a 1025 para evitar formas incompletas. _calculateTargetId optimiza fetch limitando por generación max.
-// Isolate para fetch evita bloqueo en main thread. _applyFilters filtra en memoria después de fetch.
-// Si búsqueda exacta, fetch hasta ese ID. Auto-carga si lista filtrada pequeña.
-
-class ImcPokedexScreen extends StatefulWidget {
-  const ImcPokedexScreen({super.key}); // Constructor.
+class SelectorPokemonScreen extends StatefulWidget {
+  const SelectorPokemonScreen({super.key});
 
   @override
-  State<ImcPokedexScreen> createState() => _ImcPokedexScreenState(); // Crea estado.
+  State<SelectorPokemonScreen> createState() => _SelectorPokemonScreenState();
 }
 
-class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
+class _SelectorPokemonScreenState extends State<SelectorPokemonScreen>
+    with SingleTickerProviderStateMixin {
+  final Set<Pokemon> _seleccionPoke = {};
+  late Pokemon pokeElegido1;
+  late Pokemon pokeElegido2;
+
   final ScrollController _scrollController =
       ScrollController(); // Controller para infinite scroll.
   final List<Pokemon> _allPokemons = []; // Lista total loaded.
@@ -72,6 +64,26 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
   // Actualizado: Límite a Pokémon base completos (evita formas con datos incompletos)
   static const int _maxPokedexId = 1025; // Límite max ID.
 
+  void _handlePokemonSelect(Pokemon pokemon) {
+    setState(() {
+      if (_seleccionPoke.contains(pokemon)) {
+        // Deseleccionar
+        _seleccionPoke.remove(pokemon);
+      } else if (_seleccionPoke.length < 2) {
+        // Seleccionar (si hay menos de 2)
+        _seleccionPoke.add(pokemon);
+      } else {
+        // Si ya hay 2 y toca uno nuevo, no hace nada,
+        // o podrías optar por deseleccionar el primero y seleccionar el nuevo,
+        // pero por ahora limitaremos a 2.
+      }
+    });
+  }
+
+  bool _isPokemonCurrentlySelected(Pokemon pokemon) {
+    return _seleccionPoke.contains(pokemon);
+  }
+
   @override
   void initState() {
     // Inicializa.
@@ -100,21 +112,6 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
     _filterMode = 'OR'; // Default modo.
     _specificSearch = false; // No específica.
     _targetSearchId = null; // No target.
-  }
-
-  void _handlePokemonNavigation(Pokemon pokemon) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PokemonDetailScreen(
-          pokemon: pokemon,
-        ), // Importa tu pantalla de detalles
-      ),
-    );
-  }
-
-  bool _isPokemonNeverSelected(Pokemon pokemon) {
-    return false; // Nunca hay selección en la Pokédex normal
   }
 
   Future<void> _fetchPokemons({int? targetId}) async {
@@ -432,12 +429,42 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pokédex', style: TextStyles.bodyText),
+        title: Text(
+          'Elige los 2 Pokémon a Comparar',
+          style: TextStyles.bodyText,
+        ),
         backgroundColor: AppColors.backgroundComponentSelected,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: <Widget>[
+          TextButton.icon(
+            icon: Icon(
+              _seleccionPoke.length == 2 ? Icons.cancel : Icons.select_all,
+            ),
+            label: Text(
+              _seleccionPoke.length == 2
+                  ? 'A PokeComparar!'
+                  : 'Faltan/Sobran Pokémon',
+              style: TextStyles.bodyText,
+            ),
+            onPressed: () {
+              pokeElegido1 = _seleccionPoke.first;
+              pokeElegido2 = _seleccionPoke.last;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ComparadorPokemonState(
+                    pokeElegido1: pokeElegido1,
+                    pokeElegido2: pokeElegido2,
+                  ),
+                ),
+              );
+            },
+          ),
+          SizedBox(width: 40),
+        ],
       ),
       body: Container(
         color: AppColors.fondoPokedex,
@@ -451,8 +478,8 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
                 scrollController: _scrollController,
                 isLoading: _isLoading,
                 hasMore: _hasMore,
-                onSelected: _handlePokemonNavigation,
-                isSelected: _isPokemonNeverSelected,
+                onSelected: _handlePokemonSelect,
+                isSelected: _isPokemonCurrentlySelected,
               ),
             ),
           ],

@@ -6,7 +6,14 @@ import 'package:pokedex/screens/Resultado_comparar.dart';
 import 'package:pokedex/services/database_services.dart';
 
 class ComparadorPokemonState extends StatefulWidget {
-  const ComparadorPokemonState({super.key});
+  final Pokemon pokeElegido1;
+  final Pokemon pokeElegido2;
+
+  const ComparadorPokemonState({
+    super.key,
+    required this.pokeElegido1,
+    required this.pokeElegido2,
+  });
 
   @override
   State<ComparadorPokemonState> createState() => _ComparadorPokemonState();
