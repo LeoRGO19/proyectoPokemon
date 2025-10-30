@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/screens/imc_pokedex_screen.dart';
 import 'package:pokedex/screens/comparador_pokemon.dart';
+import 'package:pokedex/screens/selector_pokemon_screen.dart';
 
 class MenuPrincipal extends StatefulWidget {
   const MenuPrincipal({super.key});
@@ -45,7 +46,7 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ComparadorPokemonState(),
+                      builder: (context) => SelectorPokemonScreen(),
                     ),
                   );
                 },
