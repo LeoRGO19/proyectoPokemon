@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/data/pokemon.dart';
-import 'package:pokedex/screens/Resultado_comparar.dart';
-import 'package:pokedex/services/database_services.dart';
+import 'package:pokedex/screens/resultado_comparar.dart';
 
 class ComparadorPokemonState extends StatefulWidget {
   final Pokemon pokeElegido1;
@@ -20,14 +19,9 @@ class ComparadorPokemonState extends StatefulWidget {
 }
 
 class _ComparadorPokemonState extends State<ComparadorPokemonState> {
-  Pokemon? _pokeElegido1;
-  Pokemon? _pokeElegido2;
-  late Future<List<Pokemon>> _pokemonListFuture;
-
   @override
   void initState() {
     super.initState();
-    _pokemonListFuture = DatabaseService.instance.getPokemon();
   }
 
   @override
@@ -37,6 +31,18 @@ class _ComparadorPokemonState extends State<ComparadorPokemonState> {
 
   @override
   Widget build(BuildContext context) {
+    final poke1 = widget.pokeElegido1;
+    final poke2 = widget.pokeElegido2;
+    final id1 = poke1.url.split("/")[6];
+    final id2 = poke2.url.split("/")[6];
+    final screenHeight = MediaQuery.of(context).size.height; // Altura pantalla.
+    final titleHeight = screenHeight * 0.15; // Altura título.
+    final availableHeight = // Altura disponible.
+        screenHeight -
+        titleHeight -
+        MediaQuery.of(context).padding.top -
+        kToolbarHeight;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('PokeComparador', style: TextStyles.bodyText),
@@ -48,113 +54,67 @@ class _ComparadorPokemonState extends State<ComparadorPokemonState> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<List<Pokemon>>(
-          future: _pokemonListFuture,
-          builder: (context, snapshot) {
-            final List<Pokemon> pokemonData = snapshot.data!;
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Estos son los Pokémon a Compara',
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 100),
 
-            if (_pokeElegido1 == null && pokemonData.isNotEmpty) {
-              _pokeElegido1 = pokemonData.first;
-            }
-
-            if (_pokeElegido2 == null && pokemonData.isNotEmpty) {
-              _pokeElegido2 = pokemonData[1];
-            }
-
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Text(
-                  'Selecciona dos Pokémon para comparar:',
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 150),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Center(
-                      child: DropdownMenu<Pokemon>(
-                        dropdownMenuEntries: pokemonData
-                            .map<DropdownMenuEntry<Pokemon>>((Pokemon pok) {
-                              final id = pok.url.split("/")[6];
-                              return DropdownMenuEntry<Pokemon>(
-                                value: pok,
-                                label: '$id. ${pok.name}',
-                              );
-                            })
-                            .toList(),
-
-                        initialSelection: _pokeElegido1,
-                        label: const Text('Pokémon 1'),
-                        onSelected: (Pokemon? nuevoPokemon) {
-                          if (nuevoPokemon != null) {
-                            setState(() {
-                              _pokeElegido1 = nuevoPokemon;
-                            });
-                            debugPrint(
-                              ' P1 Seleccionado: ${nuevoPokemon.name}',
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Center(
-                      child: DropdownMenu<Pokemon>(
-                        dropdownMenuEntries: pokemonData
-                            .map<DropdownMenuEntry<Pokemon>>((Pokemon pok) {
-                              final id = pok.url.split("/")[6];
-                              return DropdownMenuEntry<Pokemon>(
-                                value: pok,
-                                label: '$id. ${pok.name}',
-                              );
-                            })
-                            .toList(),
-
-                        initialSelection: _pokeElegido2,
-                        label: const Text('Pokemon 2'),
-                        onSelected: (Pokemon? nuevoPokemon2) {
-                          if (nuevoPokemon2 != null) {
-                            setState(() {
-                              _pokeElegido2 = nuevoPokemon2;
-                            });
-                            debugPrint(
-                              'P2 Seleccionado: ${nuevoPokemon2.name}',
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 70),
-
-                Text(
-                  'P1: ${_pokeElegido1!.name} vs P2: ${_pokeElegido2!.name}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 25),
+                Center(
+                  child: Image.network(
+                    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id1.png',
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: availableHeight * 0.4, // Altura.
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.error), // Error icon.
+                  ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(width: 10),
 
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ResultadoComparar(),
-                      ),
-                    );
-                  },
-                  child: Text("Comparar", style: TextStyles.menuText),
+                Center(
+                  child: Image.network(
+                    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id2.png',
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: availableHeight * 0.4, // Altura.
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.error), // Error icon.
+                  ),
                 ),
               ],
-            );
-          },
+            ),
+            const SizedBox(height: 70),
+
+            Text(
+              'P1: ${poke1.name} vs P2: ${poke2.name}',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 25),
+            ),
+
+            const SizedBox(height: 30),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ResultadoComparar(pokemon1: poke1, pokemon2: poke2),
+                  ),
+                );
+              },
+              child: Text("Comparar", style: TextStyles.menuText),
+            ),
+          ],
         ),
       ),
     );
