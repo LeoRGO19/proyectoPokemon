@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/core/text_styles.dart';
-import 'package:pokedex/screens/comparador_pokemon.dart';
-import 'package:pokedex/screens/imc_pokemon_details.dart';
 
 // Widget para lista de cards de Pokémon en grid.
 // Muestra ID, nombre, imagen; clickable a details.

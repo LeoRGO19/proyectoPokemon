@@ -8,9 +8,6 @@ import 'package:pokedex/components/pokedex_components/search_bar_widget.dart';
 import 'package:pokedex/components/pokedex_components/category_filter_widget.dart';
 import 'package:pokedex/components/pokedex_components/pokemon_card_list.dart';
 import 'package:pokedex/data/pokeapi.dart';
-import 'package:pokedex/data/pokemon.dart';
-import 'package:pokedex/core/text_styles.dart';
-import 'package:pokedex/core/app_colors.dart';
 import 'dart:isolate';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/data/favoriteWatcher.dart';
@@ -72,11 +69,7 @@ class _SelectorPokemonScreenState extends State<SelectorPokemonScreen>
       } else if (_seleccionPoke.length < 2) {
         // Seleccionar (si hay menos de 2)
         _seleccionPoke.add(pokemon);
-      } else {
-        // Si ya hay 2 y toca uno nuevo, no hace nada,
-        // o podrías optar por deseleccionar el primero y seleccionar el nuevo,
-        // pero por ahora limitaremos a 2.
-      }
+      } else {}
     });
   }
 

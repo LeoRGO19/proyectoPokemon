@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/core/text_styles.dart';
+import 'package:pokedex/data/pokemon.dart';
 
 class ResultadoComparar extends StatefulWidget {
-  const ResultadoComparar({super.key});
+  final Pokemon pokemon1;
+  final Pokemon pokemon2;
+  const ResultadoComparar({
+    super.key,
+    required this.pokemon1,
+    required this.pokemon2,
+  });
 
   @override
   State<ResultadoComparar> createState() => _ResultadoCompararState();
