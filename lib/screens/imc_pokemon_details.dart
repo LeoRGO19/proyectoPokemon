@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex/components/team_components/add.dart';
 import 'package:pokedex/data/exception_handler.dart';
 import 'package:pokedex/data/pokeapi.dart';
 import 'package:pokedex/data/pokemon.dart';
@@ -10,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:pokedex/components/characteristic_widget.dart';
 import 'package:pokedex/components/pokedex_components/stats_chart_widget.dart';
 import 'package:pokedex/components/pokedex_components/fav.dart';
+import 'package:pokedex/components/team_components/add.dart';
 
 // Pantalla principal de detalles de Pokémon.
 // Esta pantalla carga y muestra detalles detallados de un Pokémon específico.
@@ -250,24 +252,40 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                       height: titleHeight, // Altura calculada.
                       width: double.infinity, // Ancho full.
                       color: AppColors.fontoTituloDetalle, // Negro.
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        // Centra texto.
+                      child: Stack(
                         children: [
-                          Text(
-                            // Texto ID y nombre.
-                            '#${_details['id']} ${widget.pokemon.name.toUpperCase()}',
-                            style: TextStyles.bodyText.copyWith(
-                              // Estilo con color blanco y size 24.
-                              color: Colors.white,
-                              fontSize: 24,
+                          // Widget 1 and Widget 2 (centered)
+                          Align(
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              // Centra texto.
+                              children: [
+                                Text(
+                                  // Texto ID y nombre.
+                                  '#${_details['id']} ${widget.pokemon.name.toUpperCase()}',
+                                  style: TextStyles.bodyText.copyWith(
+                                    // Estilo con color blanco y size 24.
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                  ),
+                                ),
+                                //se agrega  botón para marcar como favorito
+                                SizedBox(
+                                  width: titleHeight,
+                                  height: titleHeight,
+                                  child: BotonFavorito(pokemon: widget.pokemon),
+                                ),
+                              ],
                             ),
                           ),
-                          //se agrega  botón para marcar como favorito
-                          SizedBox(
-                            width: titleHeight,
-                            height: titleHeight,
-                            child: BotonFavorito(pokemon: widget.pokemon),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: SizedBox(
+                              width: titleHeight,
+                              height: titleHeight,
+                              child: BotonEquipo(pokemon: widget.pokemon),
+                            ),
                           ),
                         ],
                       ),

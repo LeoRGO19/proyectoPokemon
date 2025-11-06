@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/screens/imc_pokedex_screen.dart';
+import 'package:pokedex/screens/team_screens/team_manager.dart';
 
 class MenuPrincipal extends StatefulWidget {
   const MenuPrincipal({super.key});
@@ -42,6 +43,15 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
               ElevatedButton(
                 onPressed: null,
                 child: Text("Otra funcionalidad", style: TextStyles.menuText),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TeamManager()),
+                  );
+                },
+                child: Text("Equipos", style: TextStyles.menuText),
               ),
 
               // Espacio para agregar más botones o widgets más adelante

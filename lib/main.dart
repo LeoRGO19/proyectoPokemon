@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex/data/teamWatcher.dart';
 import 'package:pokedex/screens/menu_principal.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/data/favoriteWatcher.dart';
@@ -7,8 +8,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => FavoritesProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => FavoritesProvider()),
+        ChangeNotifierProvider(create: (context) => TeamsProvider()),
+      ],
       child: const MainApp(),
     ),
   );
