@@ -44,6 +44,7 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
                 onPressed: null,
                 child: Text("Otra funcionalidad", style: TextStyles.menuText),
               ),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -51,7 +52,10 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
                     MaterialPageRoute(builder: (context) => TeamManager()),
                   );
                 },
-                child: Text("Equipos", style: TextStyles.menuText),
+                child: Text(
+                  "Organizador de equipos",
+                  style: TextStyles.menuText,
+                ),
               ),
 
               // Espacio para agregar más botones o widgets más adelante

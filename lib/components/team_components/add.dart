@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/components/team_components/team_menu.dart';
-
-import 'package:pokedex/core/text_styles.dart';
-import 'package:pokedex/screens/team_screens/team_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/data/teamWatcher.dart';
+import 'package:pokedex/core/text_styles.dart';
 
 //boton que permite agregar pokemon a equipo
 class BotonEquipo extends StatefulWidget {
@@ -31,8 +29,8 @@ class _BotonEquipoState extends State<BotonEquipo> {
               builder: (BuildContext context, StateSetter setState) {
                 return Dialog(
                   child: SizedBox(
-                    height: 300.0, // Constrain the height of the dialog content
-                    width: 300.0, // Constrain the width
+                    height: 300.0,
+                    width: 300.0,
                     child: Column(
                       children: [
                         const Padding(
@@ -79,7 +77,10 @@ class _BotonEquipoState extends State<BotonEquipo> {
                                             // Actualiza estado.
                                             if (value) {
                                               // Si seleccionado.
-                                              team.add(widget.pokemon.name);
+                                              team.add(
+                                                widget.pokemon.name,
+                                                context,
+                                              );
                                             } else {
                                               if (team.isTeamedUp(
                                                 widget.pokemon.name,
@@ -109,7 +110,7 @@ class _BotonEquipoState extends State<BotonEquipo> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextButton(
-                            child: const Text('Close'),
+                            child: const Text('Cerrar'),
                             onPressed: () {
                               Navigator.pop(context);
                             },
