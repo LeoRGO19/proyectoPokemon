@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/screens/team_screens/team_manager.dart';
+import 'package:pokedex/data/pokeapi.dart';
+import 'package:http/http.dart' as http;
 
 class Team {
   final String title;
-  Set<String> deck = {};
+  final Set<String> deck = {};
+  final List<Pokemon> pokemons = [];
+  final Map<String, dynamic> details = {};
+
   Team({required this.title});
 
   bool isTeamedUp(String poke) {
@@ -14,6 +19,7 @@ class Team {
   void add(String poke, BuildContext context) {
     if (deck.length < 6) {
       deck.add(poke);
+      fetchPokemon(poke);
     } else {
       _showMyDialog(context);
     }
@@ -23,8 +29,21 @@ class Team {
     deck.remove(poke);
   }
 
-  void pp() {
-    print(deck);
+  void fetchPokemon(String name) async {
+    Pokemon? poke = await PokeApi.fetchPokemonByName(name);
+    if (poke != null) {
+      pokemons.add(poke);
+      _fetchDetails(poke).then((data) {
+        details[name] = data;
+      });
+    }
+  }
+
+  String pp() {
+    if (deck.isEmpty) {
+      return deck.toString();
+    } else
+      return "Está vacio";
   }
 
   void _showMyDialog(BuildContext context) {
@@ -57,5 +76,19 @@ class Team {
         );
       },
     );
+  }
+
+  Future<Map<String, dynamic>?> _fetchDetails(Pokemon pokemon) async {
+    // Función para fetch todos los datos.
+    try {
+      // Try-catch para errores.
+      final Map<String, dynamic> details =
+          await PokeApi.fetchPokemonFullDetails(
+            pokemon.url,
+          ); // Fetch detalles full.
+      return details;
+    } catch (e) {
+      print(e);
+    }
   }
 }

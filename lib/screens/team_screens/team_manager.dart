@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:pokedex/components/team_components/team_visualizer.dart';
 import 'package:pokedex/data/pokemon.dart';
-import 'package:pokedex/components/team_components/team_menu.dart';
+import 'package:pokedex/components/team_components/team.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/data/teamWatcher.dart';
@@ -15,6 +16,13 @@ class TeamManager extends StatefulWidget {
 }
 
 class _TeamManagerState extends State<TeamManager> {
+  @override
+  void dispose() {
+    // Limpia.
+    // _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final teams = context.watch<TeamsProvider>();
@@ -30,9 +38,19 @@ class _TeamManagerState extends State<TeamManager> {
       ),
       body: Container(
         color: AppColors.fondoPokedex,
-        child: Column(children: [
-            
-          ],
+        child: ListView.separated(
+          itemCount: _items.length, // Replace with your actual item count
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              // Contenedor título.
+              height: 300, // Altura calculada.
+              width: double.infinity,
+              child: TeamVisualizer(team: _items[index]),
+            );
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return Divider(); // Or any other separator widget
+          },
         ),
       ),
     );

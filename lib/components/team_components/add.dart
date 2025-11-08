@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon.dart';
-import 'package:pokedex/components/team_components/team_menu.dart';
+import 'package:pokedex/components/team_components/team.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/data/teamWatcher.dart';
 import 'package:pokedex/core/text_styles.dart';
@@ -77,18 +77,16 @@ class _BotonEquipoState extends State<BotonEquipo> {
                                             // Actualiza estado.
                                             if (value) {
                                               // Si seleccionado.
-                                              team.add(
+                                              teams.add(
+                                                team,
                                                 widget.pokemon.name,
                                                 context,
                                               );
                                             } else {
-                                              if (team.isTeamedUp(
+                                              teams.remove(
+                                                team,
                                                 widget.pokemon.name,
-                                              )) {
-                                                team.remove(
-                                                  widget.pokemon.name,
-                                                );
-                                              }
+                                              );
                                             }
                                           });
                                         }
