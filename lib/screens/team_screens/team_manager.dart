@@ -38,19 +38,19 @@ class _TeamManagerState extends State<TeamManager> {
       ),
       body: Container(
         color: AppColors.fondoPokedex,
-        child: ListView.separated(
-          itemCount: _items.length, // Replace with your actual item count
+        child: ListView.builder(
+          itemCount: _items.length,
           itemBuilder: (BuildContext context, int index) {
             return Container(
               // Contenedor título.
-              height: 300, // Altura calculada.
+              height: 300,
               width: double.infinity,
               child: TeamVisualizer(team: _items[index]),
             );
           },
-          separatorBuilder: (BuildContext context, int index) {
-            return Divider(); // Or any other separator widget
-          },
+          /*separatorBuilder: (BuildContext context, int index) {
+            return Divider();
+          },*/
         ),
       ),
     );
