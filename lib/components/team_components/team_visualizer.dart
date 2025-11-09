@@ -28,7 +28,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
     if (widget.team.deck.isEmpty) {
       // Si vacío
       return Center(
-        child: Text(widget.team.title + "está vacio"), // Mensaje.
+        child: Text(widget.team.title + " está vacio"), // Mensaje.
       );
     } /* else if (pokemons.isEmpty) {
       return Center(child: CircularProgressIndicator());

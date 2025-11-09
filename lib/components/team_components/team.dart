@@ -27,6 +27,15 @@ class Team {
 
   void remove(String poke) {
     deck.remove(poke);
+    pokemons.remove(_fetchFromList(poke)!);
+  }
+
+  Pokemon? _fetchFromList(String name) {
+    for (Pokemon poke in pokemons) {
+      if (poke.name.toLowerCase() == name.toLowerCase()) {
+        return poke;
+      }
+    }
   }
 
   void fetchPokemon(String name) async {
