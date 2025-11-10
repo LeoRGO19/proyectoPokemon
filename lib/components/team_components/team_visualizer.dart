@@ -8,6 +8,7 @@ import 'package:pokedex/data/teamWatcher.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/screens/team_screens/team_stats.dart';
 import 'package:pokedex/screens/imc_pokemon_details.dart';
+import 'package:pokedex/screens/team_screens/team_adder.dart';
 
 //boton que visualizar e interactuar con equipo
 class TeamVisualizer extends StatefulWidget {
@@ -27,11 +28,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
 
   bool _checkLoading() {
     pokemons = widget.team.pokemons;
-    if (pokemons.length == widget.team.deck.length) {
-      return false;
-    } else {
-      return true;
-    }
+    return pokemons.isEmpty && !widget.team.deck.isEmpty;
   }
 
   @override
@@ -118,7 +115,9 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                 return Center(
                   child: GridView.builder(
                     padding: const EdgeInsets.all(8.0),
-                    itemCount: pokemons.length,
+                    itemCount: (pokemons.length < 6)
+                        ? pokemons.length + 1
+                        : pokemons.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 6, // 6 columnas
@@ -127,149 +126,179 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                           childAspectRatio: 0.85,
                         ),
                     itemBuilder: (context, index) {
-                      if (index < team.deck.length) {
-                        // Si item real.
-                        final pokemon = pokemons[index];
-                        final id = team.details[pokemon.name]['id'];
-                        final imageUrl =
-                            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"; // Arte con mejor calidad.
-
+                      if (index == pokemons.length) {
                         return Card(
                           elevation: 3.0,
                           shape: RoundedRectangleBorder(
                             // Shape redondeado.
                             borderRadius: BorderRadius.circular(10.0),
                           ),
-                          child: Stack(
-                            children: [
-                              Align(
-                                alignment: Alignment.center,
-                                child: InkWell(
-                                  // Clickable.
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            PokemonDetailScreen(
-                                              pokemon: pokemon,
-                                            ),
-                                      ),
-                                    );
-                                  },
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "#$id ${pokemon.name.toUpperCase()}",
-                                        style: TextStyles.cardText,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 6.0),
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(
-                                          8.0,
-                                        ),
-                                        child: Image.network(
-                                          imageUrl,
-                                          width: 150.0,
-                                          height: 150.0,
-                                          fit: BoxFit.contain,
-                                          loadingBuilder:
-                                              (context, child, progress) {
-                                                if (progress == null)
-                                                  return child;
-                                                return const Center(
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                        strokeWidth: 2,
-                                                      ),
-                                                );
-                                              },
-                                          errorBuilder:
-                                              (
-                                                context,
-                                                error,
-                                                stackTrace,
-                                              ) => // Error.
-                                              const Icon(
-                                                Icons.error,
-                                                size: 40,
-                                                color: Colors.red,
-                                              ), // Icon.
-                                        ),
-                                      ),
-                                    ],
+                          child: Center(
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        AdderPokemonScreen(team: team),
                                   ),
-                                ),
+                                );
+                              },
+                              tooltip: "Agregar pokémon al equipo",
+                              icon: Icon(
+                                Icons.add,
+                                size: 60.0,
+                                color: Colors.blueGrey,
                               ),
-                              Positioned(
-                                bottom: 0.0,
-                                right: 0.0,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(1.0),
-                                  child: FloatingActionButton(
-                                    heroTag:
-                                        pokemon.name +
-                                        team.title, //tags unicos para evitar conflictos en los widget trees
-                                    backgroundColor: Colors.transparent,
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: const Text(
-                                              'Sacar Pokémon de equipo',
-                                            ),
-                                            content: Text(
-                                              '¿Desea sacar a ${pokemon.name} del equipo?',
-                                            ),
-                                            actions: <Widget>[
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                  teams.removePokemon(
-                                                    team,
-                                                    pokemon.name,
-                                                  );
-                                                },
-                                                child: const Text('Eliminar'),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(
-                                                    context,
-                                                  ).pop(); // cierra dialog
-                                                },
-                                                child: const Text('Cancelar'),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                    elevation: 0.0,
-                                    disabledElevation: 0.0,
-                                    tooltip: 'Eliminar',
-                                    hoverColor: Colors.transparent,
-                                    highlightElevation: 0.0,
-                                    focusElevation: 0.0,
-                                    child: const Icon(
-                                      Icons.delete,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         );
                       } else {
-                        return const Padding(
-                          // Loading item.
-                          padding: EdgeInsets.all(16.0),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
+                        if (index < team.deck.length) {
+                          // Si item real.
+                          final pokemon = pokemons[index];
+                          final id = team.details[pokemon.name]['id'];
+                          final imageUrl =
+                              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"; // Arte con mejor calidad.
+
+                          return Card(
+                            elevation: 3.0,
+                            shape: RoundedRectangleBorder(
+                              // Shape redondeado.
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: Stack(
+                              children: [
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: InkWell(
+                                    // Clickable.
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              PokemonDetailScreen(
+                                                pokemon: pokemon,
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "#$id ${pokemon.name.toUpperCase()}",
+                                          style: TextStyles.cardText,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 6.0),
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            8.0,
+                                          ),
+                                          child: Image.network(
+                                            imageUrl,
+                                            width: 150.0,
+                                            height: 150.0,
+                                            fit: BoxFit.contain,
+                                            loadingBuilder:
+                                                (context, child, progress) {
+                                                  if (progress == null)
+                                                    return child;
+                                                  return const Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                        ),
+                                                  );
+                                                },
+                                            errorBuilder:
+                                                (
+                                                  context,
+                                                  error,
+                                                  stackTrace,
+                                                ) => // Error.
+                                                const Icon(
+                                                  Icons.error,
+                                                  size: 40,
+                                                  color: Colors.red,
+                                                ), // Icon.
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0.0,
+                                  right: 0.0,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(1.0),
+                                    child: FloatingActionButton(
+                                      heroTag:
+                                          pokemon.name +
+                                          team.title, //tags unicos para evitar conflictos en los widget trees
+                                      backgroundColor: Colors.transparent,
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text(
+                                                'Sacar Pokémon de equipo',
+                                              ),
+                                              content: Text(
+                                                '¿Desea sacar a ${pokemon.name} del equipo?',
+                                              ),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                    teams.removePokemon(
+                                                      team,
+                                                      pokemon.name,
+                                                    );
+                                                  },
+                                                  child: const Text('Eliminar'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(
+                                                      context,
+                                                    ).pop(); // cierra dialog
+                                                  },
+                                                  child: const Text('Cancelar'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      elevation: 0.0,
+                                      disabledElevation: 0.0,
+                                      tooltip: 'Eliminar',
+                                      hoverColor: Colors.transparent,
+                                      highlightElevation: 0.0,
+                                      focusElevation: 0.0,
+                                      child: const Icon(
+                                        Icons.delete,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return const Padding(
+                            // Loading item.
+                            padding: EdgeInsets.all(16.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
                       }
                     },
                     physics: NeverScrollableScrollPhysics(),

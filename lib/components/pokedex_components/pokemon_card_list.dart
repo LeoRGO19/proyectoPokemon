@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/core/text_styles.dart';
-import 'package:pokedex/screens/imc_pokemon_details.dart';
 
 // Widget para lista de cards de Pokémon en grid.
 // Muestra ID, nombre, imagen; clickable a details.
@@ -13,6 +12,8 @@ class PokemonCardList extends StatelessWidget {
   final ScrollController scrollController; // Controller.
   final bool isLoading; // Loading.
   final bool hasMore; // More.
+  final void Function(Pokemon pokemon) onSelected;
+  final bool Function(Pokemon pokemon) isSelected;
 
   const PokemonCardList({
     super.key,
@@ -20,6 +21,8 @@ class PokemonCardList extends StatelessWidget {
     required this.scrollController,
     required this.isLoading,
     required this.hasMore,
+    required this.onSelected,
+    required this.isSelected,
   });
   @override
   Widget build(BuildContext context) {
@@ -59,22 +62,23 @@ class PokemonCardList extends StatelessWidget {
           final id = pokemon.url.split("/")[6];
           final imageUrl =
               "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"; // Arte con mejor calidad.
-
+          final bool isPokemonSelected = isSelected(pokemon);
           return Card(
-            elevation: 3.0,
+            elevation: isPokemonSelected ? 8.0 : 3.0,
             shape: RoundedRectangleBorder(
               // Shape redondeado.
               borderRadius: BorderRadius.circular(10.0),
+              side: isPokemonSelected
+                  ? const BorderSide(
+                      color: Colors.blueAccent,
+                      width: 3.0,
+                    ) // Borde
+                  : BorderSide.none,
             ),
             child: InkWell(
               // Clickable.
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PokemonDetailScreen(pokemon: pokemon),
-                  ),
-                );
+                onSelected(pokemon);
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

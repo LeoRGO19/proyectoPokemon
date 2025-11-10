@@ -10,6 +10,7 @@ import 'package:pokedex/core/app_colors.dart';
 import 'dart:isolate';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/data/favoriteWatcher.dart';
+import 'package:pokedex/screens/imc_pokemon_details.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/services/database_services.dart';
 import 'dart:io';
@@ -101,6 +102,21 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
     _targetSearchId = null; // No target.
   }
 
+  void _handlePokemonNavigation(Pokemon pokemon) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PokemonDetailScreen(
+          pokemon: pokemon,
+        ), // Importa tu pantalla de detalles
+      ),
+    );
+  }
+
+  bool _isPokemonNeverSelected(Pokemon pokemon) {
+    return false; // Nunca hay selección en la Pokédex normal
+  }
+
   Future<void> _fetchPokemons({int? targetId}) async {
     final db = DatabaseService.instance;
     if (Platform.isWindows || Platform.isLinux) {
@@ -169,7 +185,7 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
               _applyFilters(); //permite que pokémon se vean
               for (var pokemon in isolateResult) {
                 // Print debug.
-                print(
+                debugPrint(
                   'Pokémon: ${pokemon.name}, Generación: ${pokemon.generation}',
                 );
               }
@@ -435,6 +451,8 @@ class _ImcPokedexScreenState extends State<ImcPokedexScreen> {
                 scrollController: _scrollController,
                 isLoading: _isLoading,
                 hasMore: _hasMore,
+                onSelected: _handlePokemonNavigation,
+                isSelected: _isPokemonNeverSelected,
               ),
             ),
           ],
