@@ -442,7 +442,7 @@ class _AdderPokemonScreenState extends State<AdderPokemonScreen>
           TextButton.icon(
             icon: Icon(_seleccionPoke.length != 0 ? Icons.done : Icons.cancel),
             label: Text(
-              _seleccionPoke.length != 0
+              _seleccionPoke.isNotEmpty
                   ? 'Agregar a ${team.title}!'
                   : 'No ha seleccionado pokémon',
               style: TextStyles.bodyText,
@@ -461,16 +461,127 @@ class _AdderPokemonScreenState extends State<AdderPokemonScreen>
         color: AppColors.fondoPokedex,
         child: Column(
           children: [
-            SearchBarWidget(onChanged: _filterBySearch),
-            CategoryFilterWidget(onFilterChanged: _onCategoriesChanged),
             Expanded(
-              child: PokemonCardList(
-                pokemons: _filteredPokemons,
-                scrollController: _scrollController,
-                isLoading: _isLoading,
-                hasMore: _hasMore,
-                onSelected: _handlePokemonSelect,
-                isSelected: _isPokemonCurrentlySelected,
+              child: Column(
+                children: [
+                  SearchBarWidget(onChanged: _filterBySearch),
+                  CategoryFilterWidget(onFilterChanged: _onCategoriesChanged),
+                  Expanded(
+                    child: PokemonCardList(
+                      pokemons: _filteredPokemons,
+                      scrollController: _scrollController,
+                      isLoading: _isLoading,
+                      hasMore: _hasMore,
+                      onSelected: _handlePokemonSelect,
+                      isSelected: _isPokemonCurrentlySelected,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Visibility(
+              visible: (_seleccionPoke.isNotEmpty),
+              //solo se ve al seleccionar pokemons
+              child: Container(
+                height: 110,
+                width: double.infinity,
+                color: Color.fromARGB(255, 55, 164, 150),
+                child: Center(
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(2.0),
+                    itemCount: _seleccionPoke.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 15, // 6 columnas
+                          crossAxisSpacing: 8.0,
+                          mainAxisSpacing: 8.0,
+                          childAspectRatio: 0.75,
+                        ),
+                    itemBuilder: (context, index) {
+                      if (index < _seleccionPoke.length) {
+                        // Si item real.
+                        final pokemon = _seleccionPoke.toList()[index];
+                        final id = pokemon.url.split("/")[6];
+                        final imageUrl =
+                            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"; // Arte con mejor calidad.
+
+                        return Card(
+                          elevation: 3.0,
+                          shape: RoundedRectangleBorder(
+                            // Shape redondeado.
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Stack(
+                            children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child: Tooltip(
+                                  message: 'Deseleccionar ${pokemon.name}',
+                                  child: InkWell(
+                                    // Clickable.
+                                    onTap: () {
+                                      setState(() {
+                                        _seleccionPoke.remove(pokemon);
+                                      });
+                                    },
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const SizedBox(height: 1.0),
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            8.0,
+                                          ),
+                                          child: Image.network(
+                                            imageUrl,
+                                            width: 60.0,
+                                            height: 60.0,
+                                            fit: BoxFit.contain,
+                                            loadingBuilder:
+                                                (context, child, progress) {
+                                                  if (progress == null)
+                                                    return child;
+                                                  return const Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                        ),
+                                                  );
+                                                },
+                                            errorBuilder:
+                                                (
+                                                  context,
+                                                  error,
+                                                  stackTrace,
+                                                ) => // Error.
+                                                const Icon(
+                                                  Icons.error,
+                                                  size: 40,
+                                                  color: Colors.red,
+                                                ), // Icon.
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return const Padding(
+                          // Loading item.
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                    },
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                  ),
+                ),
               ),
             ),
           ],
