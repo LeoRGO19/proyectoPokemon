@@ -7,8 +7,9 @@ import 'package:pokedex/data/pokeapi.dart';
 import 'package:pokedex/data/teamWatcher.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/screens/team_screens/team_stats.dart';
+import 'package:pokedex/screens/imc_pokemon_details.dart';
 
-//boton que permite agregar pokemon a equipo
+//boton que visualizar e interactuar con equipo
 class TeamVisualizer extends StatefulWidget {
   final Team team;
   const TeamVisualizer({super.key, required this.team});
@@ -18,11 +19,11 @@ class TeamVisualizer extends StatefulWidget {
 
 class _TeamVisualizerState extends State<TeamVisualizer> {
   late List<Pokemon> pokemons;
-  @override
+  /* @override
   void initState() {
     super.initState();
     pokemons = widget.team.pokemons;
-  }
+  }*/
 
   bool _checkLoading() {
     if (pokemons.length == widget.team.deck.length) {
@@ -34,158 +35,240 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
 
   @override
   Widget build(BuildContext context) {
+    final teams = context.watch<TeamsProvider>();
     final String title = widget.team.title;
-    if (widget.team.deck.isEmpty) {
+    /*if (widget.team.deck.isEmpty) {
       // Si vacío
       return Center(
         child: Text(title + " está vacio"), // Mensaje.
       );
-    } /* else if (pokemons.isEmpty) {
+    }*/ /* else if (pokemons.isEmpty) {
       return Center(child: CircularProgressIndicator());
     }*/
-
-    return Scaffold(
-      // Scaffold base.
-      backgroundColor: Colors.transparent, // Fondo oscuro.
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(title, style: TextStyles.bodyText),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.info),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TeamStats(team: widget.team),
-                ),
-              ); //redirige a las estadísticas de equipo
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Eliminar equipo'),
-                    content: Text(
-                      '¿Desea eliminar $title? Esta acción es permanente.',
+    return Consumer<TeamsProvider>(
+      //para que "escuche" cambios en los equipos
+      builder: (context, teams, _) {
+        pokemons = widget.team.pokemons;
+        return Scaffold(
+          // Scaffold base.
+          backgroundColor: Colors.transparent, // Fondo oscuro.
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: Text(title, style: TextStyles.bodyText),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.info),
+                tooltip: 'Ver estadísticas del equipo',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TeamStats(team: widget.team),
                     ),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          //aqui elimino equipo
-                        },
-                        child: const Text('Eliminar'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // cierra dialog
-                        },
-                        child: const Text('Cancelar'),
-                      ),
-                    ],
+                  ); //redirige a las estadísticas de equipo
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.delete),
+                tooltip: 'Eliminar equipo',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Eliminar equipo'),
+                        content: Text(
+                          '¿Desea eliminar $title? Esta acción es permanente.',
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              teams.removeTeam(widget.team);
+                            },
+                            child: const Text('Eliminar'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // cierra dialog
+                            },
+                            child: const Text('Cancelar'),
+                          ),
+                        ],
+                      );
+                    },
                   );
                 },
-              );
-            },
-          ),
-        ],
-        backgroundColor: const Color.fromARGB(255, 241, 87, 87),
-        /*leading: IconButton(
+              ),
+            ],
+            backgroundColor: const Color.fromARGB(255, 241, 87, 87),
+            /*leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),*/
-      ),
-      body:
-          _checkLoading() // Condicional para loading.
-          ? const Center(child: CircularProgressIndicator()) // Indicator.
-          : Center(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(8.0),
-                itemCount: pokemons.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 6, // 6 columnas
-                  crossAxisSpacing: 8.0,
-                  mainAxisSpacing: 8.0,
-                  childAspectRatio: 0.85,
-                ),
-                itemBuilder: (context, index) {
-                  if (index < widget.team.deck.length) {
-                    // Si item real.
-                    final pokemon = pokemons[index];
-                    final id = widget.team.details[pokemon.name]['id'];
-                    final imageUrl =
-                        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"; // Arte con mejor calidad.
-
-                    return Card(
-                      elevation: 3.0,
-                      shape: RoundedRectangleBorder(
-                        // Shape redondeado.
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: InkWell(
-                        // Clickable.
-                        onTap: () {
-                          /*Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PokemonDetailScreen(pokemon: pokemon),
-                  ),
-                );*/
-                        },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "#$id ${pokemon.name.toUpperCase()}",
-                              style: TextStyles.cardText,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 6.0),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: Image.network(
-                                imageUrl,
-                                width: 150.0,
-                                height: 150.0,
-                                fit: BoxFit.contain,
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return const Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  );
-                                },
-                                errorBuilder:
-                                    (context, error, stackTrace) => // Error.
-                                    const Icon(
-                                      Icons.error,
-                                      size: 40,
-                                      color: Colors.red,
-                                    ), // Icon.
-                              ),
-                            ),
-                          ],
+          ),
+          body:
+              _checkLoading() // Condicional para loading.
+              ? const Center(child: CircularProgressIndicator()) // Indicator.
+              : Center(
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: pokemons.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 6, // 6 columnas
+                          crossAxisSpacing: 8.0,
+                          mainAxisSpacing: 8.0,
+                          childAspectRatio: 0.85,
                         ),
-                      ),
-                    );
-                  } else {
-                    return const Padding(
-                      // Loading item.
-                      padding: EdgeInsets.all(16.0),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                },
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-              ),
-            ),
+                    itemBuilder: (context, index) {
+                      if (index < widget.team.deck.length) {
+                        // Si item real.
+                        final pokemon = pokemons[index];
+                        final id = widget.team.details[pokemon.name]['id'];
+                        final imageUrl =
+                            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"; // Arte con mejor calidad.
+
+                        return Card(
+                          elevation: 3.0,
+                          shape: RoundedRectangleBorder(
+                            // Shape redondeado.
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Stack(
+                            children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child: InkWell(
+                                  // Clickable.
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            PokemonDetailScreen(
+                                              pokemon: pokemon,
+                                            ),
+                                      ),
+                                    );
+                                  },
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "#$id ${pokemon.name.toUpperCase()}",
+                                        style: TextStyles.cardText,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 6.0),
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(
+                                          8.0,
+                                        ),
+                                        child: Image.network(
+                                          imageUrl,
+                                          width: 150.0,
+                                          height: 150.0,
+                                          fit: BoxFit.contain,
+                                          loadingBuilder:
+                                              (context, child, progress) {
+                                                if (progress == null)
+                                                  return child;
+                                                return const Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                      ),
+                                                );
+                                              },
+                                          errorBuilder:
+                                              (
+                                                context,
+                                                error,
+                                                stackTrace,
+                                              ) => // Error.
+                                              const Icon(
+                                                Icons.error,
+                                                size: 40,
+                                                color: Colors.red,
+                                              ), // Icon.
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 0.0,
+                                right: 0.0,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(1.0),
+                                  child: FloatingActionButton(
+                                    backgroundColor: Colors.transparent,
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text(
+                                              'Sacar Pokémon de equipo',
+                                            ),
+                                            content: Text(
+                                              '¿Desea sacar a ${pokemon.name} del equipo?',
+                                            ),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                  widget.team.remove(
+                                                    pokemon.name,
+                                                  );
+                                                },
+                                                child: const Text('Eliminar'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(
+                                                    context,
+                                                  ).pop(); // cierra dialog
+                                                },
+                                                child: const Text('Cancelar'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    elevation: 0.0,
+                                    disabledElevation: 0.0,
+                                    tooltip: 'Eliminar',
+                                    hoverColor: Colors.transparent,
+                                    highlightElevation: 0.0,
+                                    focusElevation: 0.0,
+                                    child: const Icon(
+                                      Icons.delete,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return const Padding(
+                          // Loading item.
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                    },
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                  ),
+                ),
+        );
+      },
     );
   }
 }
