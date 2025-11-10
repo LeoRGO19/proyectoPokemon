@@ -61,6 +61,7 @@ class _TeamManagerState extends State<TeamManager> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: FloatingActionButton(
+                    heroTag: "fab2",
                     backgroundColor: AppColors.backgroundComponentSelected,
                     onPressed: () {
                       setState(() {

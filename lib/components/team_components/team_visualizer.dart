@@ -26,6 +26,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
   }*/
 
   bool _checkLoading() {
+    pokemons = widget.team.pokemons;
     if (pokemons.length == widget.team.deck.length) {
       return false;
     } else {
@@ -45,72 +46,76 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
     }*/ /* else if (pokemons.isEmpty) {
       return Center(child: CircularProgressIndicator());
     }*/
-    return Consumer<TeamsProvider>(
-      //para que "escuche" cambios en los equipos
-      builder: (context, teams, _) {
-        pokemons = widget.team.pokemons;
-        return Scaffold(
-          // Scaffold base.
-          backgroundColor: Colors.transparent, // Fondo oscuro.
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            title: Text(title, style: TextStyles.bodyText),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.info),
-                tooltip: 'Ver estadísticas del equipo',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TeamStats(team: widget.team),
+
+    return Scaffold(
+      // Scaffold base.
+      backgroundColor: Colors.transparent, // Fondo oscuro.
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(title, style: TextStyles.bodyText),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.info),
+            tooltip: 'Ver estadísticas del equipo',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TeamStats(team: widget.team),
+                ),
+              ); //redirige a las estadísticas de equipo
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.delete),
+            tooltip: 'Eliminar equipo',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Eliminar equipo'),
+                    content: Text(
+                      '¿Desea eliminar $title? Esta acción es permanente.',
                     ),
-                  ); //redirige a las estadísticas de equipo
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.delete),
-                tooltip: 'Eliminar equipo',
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Eliminar equipo'),
-                        content: Text(
-                          '¿Desea eliminar $title? Esta acción es permanente.',
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              teams.removeTeam(widget.team);
-                            },
-                            child: const Text('Eliminar'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // cierra dialog
-                            },
-                            child: const Text('Cancelar'),
-                          ),
-                        ],
-                      );
-                    },
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          teams.removeTeam(widget.team);
+                        },
+                        child: const Text('Eliminar'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // cierra dialog
+                        },
+                        child: const Text('Cancelar'),
+                      ),
+                    ],
                   );
                 },
-              ),
-            ],
-            backgroundColor: const Color.fromARGB(255, 241, 87, 87),
-            /*leading: IconButton(
+              );
+            },
+          ),
+        ],
+        backgroundColor: const Color.fromARGB(255, 241, 87, 87),
+        /*leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),*/
-          ),
-          body:
-              _checkLoading() // Condicional para loading.
-              ? const Center(child: CircularProgressIndicator()) // Indicator.
-              : Center(
+      ),
+      body:
+          _checkLoading() // Condicional para loading.
+          ? const Center(child: CircularProgressIndicator()) // Indicator.
+          : Consumer<TeamsProvider>(
+              //para que "escuche" cambios en los equipos
+              builder: (context, teams, _) {
+                final Team team = teams.getTeam(
+                  title,
+                )!; //nos aseguramos de que el equipo se actualice
+                pokemons = team.pokemons;
+                return Center(
                   child: GridView.builder(
                     padding: const EdgeInsets.all(8.0),
                     itemCount: pokemons.length,
@@ -122,10 +127,10 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                           childAspectRatio: 0.85,
                         ),
                     itemBuilder: (context, index) {
-                      if (index < widget.team.deck.length) {
+                      if (index < team.deck.length) {
                         // Si item real.
                         final pokemon = pokemons[index];
-                        final id = widget.team.details[pokemon.name]['id'];
+                        final id = team.details[pokemon.name]['id'];
                         final imageUrl =
                             "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"; // Arte con mejor calidad.
 
@@ -204,6 +209,9 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(1.0),
                                   child: FloatingActionButton(
+                                    heroTag:
+                                        pokemon.name +
+                                        team.title, //tags unicos para evitar conflictos en los widget trees
                                     backgroundColor: Colors.transparent,
                                     onPressed: () {
                                       showDialog(
@@ -220,7 +228,8 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                                               TextButton(
                                                 onPressed: () {
                                                   Navigator.of(context).pop();
-                                                  widget.team.remove(
+                                                  teams.removePokemon(
+                                                    team,
                                                     pokemon.name,
                                                   );
                                                 },
@@ -266,9 +275,9 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                     physics: NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                   ),
-                ),
-        );
-      },
+                );
+              },
+            ),
     );
   }
 }
