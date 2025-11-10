@@ -11,7 +11,6 @@ import 'package:http/http.dart' as http;
 import 'package:pokedex/components/characteristic_widget.dart';
 import 'package:pokedex/components/pokedex_components/stats_chart_widget.dart';
 import 'package:pokedex/components/pokedex_components/fav.dart';
-import 'package:pokedex/components/team_components/add.dart';
 
 // Pantalla principal de detalles de Pokémon.
 // Esta pantalla carga y muestra detalles detallados de un Pokémon específico.

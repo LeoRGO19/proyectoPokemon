@@ -6,7 +6,11 @@ import 'package:pokedex/components/team_components/team.dart';
 permitiendo que todas las iteraciones de este reflejen los cambios (como es en el caso de pokémon creados por la cadena evolutiva, 
 que son diferentes a los pokémon de la lista principal de la pokédex)*/
 class TeamsProvider extends ChangeNotifier {
-  final List<Team> _teams = [];
+  final List<Team> _teams = [
+    Team(title: 'Prueba 1'),
+    Team(title: 'Prueba 2'),
+    Team(title: 'Prueba 3'),
+  ];
   List<Team> getTeams() {
     return _teams;
   }

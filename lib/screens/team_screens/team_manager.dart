@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pokedex/components/team_components/team_visualizer.dart';
-import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/components/team_components/team.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/core/app_colors.dart';
@@ -38,19 +36,44 @@ class _TeamManagerState extends State<TeamManager> {
       ),
       body: Container(
         color: AppColors.fondoPokedex,
-        child: ListView.builder(
-          itemCount: _items.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              // Contenedor título.
-              height: 300,
-              width: double.infinity,
-              child: TeamVisualizer(team: _items[index]),
-            );
-          },
-          /*separatorBuilder: (BuildContext context, int index) {
+        child: Stack(
+          children: [
+            ListView.builder(
+              itemCount: _items.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  // Contenedor título.
+                  height: 300,
+                  width: double.infinity,
+                  child: TeamVisualizer(team: _items[index]),
+                );
+              },
+              /*separatorBuilder: (BuildContext context, int index) {
             return Divider();
           },*/
+            ),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: Visibility(
+                visible: (_items.length < 10),
+                //solo es posible crear equipos nuevos si hay menos de 10
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: FloatingActionButton(
+                    backgroundColor: AppColors.backgroundComponentSelected,
+                    onPressed: () {
+                      setState(() {
+                        teams.namingTeam(context);
+                      });
+                    },
+                    tooltip: 'Crear equipo nuevo',
+                    child: const Icon(Icons.add, color: Colors.black),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
