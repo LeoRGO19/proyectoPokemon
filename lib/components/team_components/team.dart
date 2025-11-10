@@ -5,7 +5,7 @@ import 'package:pokedex/data/pokeapi.dart';
 import 'package:http/http.dart' as http;
 
 class Team {
-  final String title;
+  String title;
   final Set<String> deck = {};
   final List<Pokemon> pokemons = [];
   final Map<String, dynamic> details = {};
@@ -48,12 +48,16 @@ class Team {
     }
   }
 
-  String pp() {
+  void renameTeam(String name) {
+    title = name;
+  }
+
+  /* String pp() {
     if (deck.isEmpty) {
       return deck.toString();
     } else
       return "Está vacio";
-  }
+  }*/
 
   void _showMyDialog(BuildContext context) {
     showDialog(

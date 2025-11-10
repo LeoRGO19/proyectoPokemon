@@ -46,13 +46,25 @@ class TeamsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void namingTeam(BuildContext context) {
+  void renamingTeam(Team team, String name) {
+    team.renameTeam(name);
+    notifyListeners();
+  }
+
+  void namingTeam(
+    BuildContext context,
+    bool creating,
+    String? title,
+    Team? team,
+  ) {
     final _formKey = GlobalKey<FormState>();
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Crear equipo'),
+          title: (creating)
+              ? Text('Crear equipo')
+              : Text('Ingrese el nuevo nombre de $title'),
           content: Form(
             key: _formKey,
             child: TextFormField(
@@ -63,13 +75,20 @@ class TeamsProvider extends ChangeNotifier {
               ),
               onSaved: (String? value) {
                 if (value != null) {
-                  addTeam(value);
-                  notifyListeners();
+                  if (creating) {
+                    addTeam(value);
+                    notifyListeners();
+                  } else {
+                    renamingTeam(team!, value);
+                  }
                 }
               },
               validator: (String? value) {
                 if (value == null || value.isEmpty) {
                   return 'Este campo es obligatorio.';
+                }
+                if (!creating && value == title) {
+                  return 'Este es el nombre actual del equipo.';
                 }
                 if (getTeam(value) != null) {
                   return 'Ya existe un equipo con este nombre.';

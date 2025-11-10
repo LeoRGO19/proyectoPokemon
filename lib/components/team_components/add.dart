@@ -119,7 +119,7 @@ class _BotonEquipoState extends State<BotonEquipo> {
                                 tooltip: 'Crear equipo nuevo',
                                 onPressed: () {
                                   setState(() {
-                                    teams.namingTeam(context);
+                                    teams.namingTeam(context, true, null, null);
                                   });
                                 },
                               ),

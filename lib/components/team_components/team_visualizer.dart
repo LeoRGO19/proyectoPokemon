@@ -49,7 +49,28 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
       backgroundColor: Colors.transparent, // Fondo oscuro.
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(title, style: TextStyles.bodyText),
+        title: Consumer<TeamsProvider>(
+          //para que "escuche" cambios en los equipos
+          builder: (context, teams, _) {
+            final Team team = teams.getTeam(
+              title,
+            )!; //nos aseguramos de que el equipo se actualice
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(title, style: TextStyles.bodyText),
+                SizedBox(width: 8),
+                IconButton(
+                  tooltip: 'Cambiar nombre de equipo',
+                  icon: Icon(Icons.edit),
+                  onPressed: () {
+                    teams.namingTeam(context, false, title, team);
+                  },
+                ),
+              ],
+            );
+          },
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.info),

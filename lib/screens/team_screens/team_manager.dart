@@ -65,7 +65,7 @@ class _TeamManagerState extends State<TeamManager> {
                     backgroundColor: AppColors.backgroundComponentSelected,
                     onPressed: () {
                       setState(() {
-                        teams.namingTeam(context);
+                        teams.namingTeam(context, true, null, null);
                       });
                     },
                     tooltip: 'Crear equipo nuevo',
