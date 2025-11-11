@@ -59,7 +59,7 @@ class _ComparadorPokemonState extends State<ComparadorPokemonState> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Estos son los Pokémon a Compara',
+              'Estos son los Pokémon a Comparar',
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
