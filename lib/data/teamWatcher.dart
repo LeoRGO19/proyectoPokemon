@@ -14,7 +14,7 @@ class TeamsProvider extends ChangeNotifier {
 
   void notify() {
     notifyListeners();
-    print('notice');
+    //print('notice');
   }
 
   List<Team> getTeams() {
@@ -31,7 +31,7 @@ class TeamsProvider extends ChangeNotifier {
   }
 
   void addPokemon(Team team, String name, BuildContext context) {
-    team.add(name, context);
+    team.add(name, context, onUpdated: notifyListeners);
     notifyListeners();
   }
 

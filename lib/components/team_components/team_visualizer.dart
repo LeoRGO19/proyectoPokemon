@@ -153,18 +153,15 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                       child: (pokemons.length != team.deck.length)
                           ? Center(child: CircularProgressIndicator())
                           : IconButton(
-                              onPressed: () {
-                                Navigator.push(
+                              onPressed: () async {
+                                await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
                                         AdderPokemonScreen(title: title),
                                   ),
-                                ).then((_) {
-                                  setState(() {
-                                    teams.notify();
-                                  }); //forzamos que se actualice el widget
-                                });
+                                );
+                                setState(() {});
                               },
                               tooltip: "Agregar pokémon al equipo",
                               icon: Icon(
@@ -179,7 +176,12 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                   if (index < team.deck.length) {
                     // Si item real.
                     final pokemon = pokemons[index];
-                    final id = team.details[pokemon.name]['id'];
+                    final id =
+                        team.details[pokemon
+                            .name]?['id']; //evitamos que hayan errores si id aún no carga
+                    if (id == null) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
                     final imageUrl =
                         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"; // Arte con mejor calidad.
 

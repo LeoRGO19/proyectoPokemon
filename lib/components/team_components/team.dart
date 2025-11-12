@@ -16,10 +16,13 @@ class Team {
     return deck.contains(poke);
   }
 
-  void add(String poke, BuildContext context) {
+  void add(String poke, BuildContext context, {VoidCallback? onUpdated}) {
     if (deck.length < 6) {
       deck.add(poke);
-      fetchPokemon(poke);
+      fetchPokemon(
+        poke,
+        onUpdated: onUpdated,
+      ); //nos aseguramos de que se actualizó para notificar
     } else {
       _showMyDialog(context);
     }
@@ -36,15 +39,19 @@ class Team {
         return poke;
       }
     }
+    return null;
   }
 
-  void fetchPokemon(String name) async {
+  void fetchPokemon(String name, {VoidCallback? onUpdated}) async {
     Pokemon? poke = await PokeApi.fetchPokemonByName(name);
     if (poke != null) {
       pokemons.add(poke);
       _fetchDetails(poke).then((data) {
         details[name] = data;
+        if (onUpdated != null)
+          onUpdated(); // notificamos al provider de que cargamos detalles
       });
+      if (onUpdated != null) onUpdated(); // notificamos provider
     }
   }
 
