@@ -5,8 +5,6 @@ import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/data/exception_handler.dart';
 import 'package:pokedex/data/pokeapi.dart';
 import 'package:http/http.dart' as http;
-import 'package:pokedex/components/characteristic_widget.dart';
-import 'package:pokedex/components/pokedex_components/stats_chart_widget.dart';
 
 class ResultadoComparar extends StatefulWidget {
   final Pokemon pokemon1;
@@ -38,6 +36,9 @@ class _ResultadoCompararState extends State<ResultadoComparar>
   bool _isLoading = true; // Flag de carga.
   String _error = ''; // Mensaje de error.
 
+  int puntajePoke1 = 0;
+  int puntajePoke2 = 0;
+
   @override
   void initState() {
     super.initState();
@@ -45,26 +46,17 @@ class _ResultadoCompararState extends State<ResultadoComparar>
     _fetchDetails(widget.pokemon1, widget.pokemon2); // Inicia fetch asíncrono.
   }
 
-  static const Map<String, String> traduccionesTipo = {
-    'grass': 'Planta',
-    'fire': 'Fuego',
-    'water': 'Agua',
-    'electric': 'Eléctrico',
-    'ice': 'Hielo',
-    'fighting': 'Lucha',
-    'poison': 'Veneno',
-    'ground': 'Tierra',
-    'flying': 'Volador',
-    'psychic': 'Psíquico',
-    'bug': 'Bicho',
-    'rock': 'Roca',
-    'ghost': 'Fantasma',
-    'dragon': 'Dragón',
-    'dark': 'Siniestro',
-    'steel': 'Acero',
-    'fairy': 'Hada',
-    'normal': 'Normal',
-  };
+  int _getStat(Map<String, dynamic> details, String statName) {
+    if (details.isEmpty || !details.containsKey('stats')) return 0;
+
+    for (var statEntry in details['stats']) {
+      if (statEntry['stat']['name'] == statName) {
+        return statEntry['base_stat'];
+      }
+    }
+    return 0; // Retorna 0 si no se encuentra
+  }
+
   Future<void> _fetchDetails(Pokemon poke1, Pokemon poke2) async {
     // Función para fetch todos los datos.
     try {
@@ -89,7 +81,6 @@ class _ResultadoCompararState extends State<ResultadoComparar>
       final weaknesses1 = await PokeApi.fetchWeaknesses(
         detailedPokemon1.types,
       ); // Debilidades.
-
       final weaknesses2 = await PokeApi.fetchWeaknesses(detailedPokemon2.types);
 
       if (!mounted) return; //chequea que sea visible, si no sale
@@ -100,9 +91,10 @@ class _ResultadoCompararState extends State<ResultadoComparar>
         _detailsPoke2 = details2;
         _weaknessesPoke1 = weaknesses1; // Debilidades.
         _weaknessesPoke2 = weaknesses2;
-
         _types1 = detailedPokemon1.types; // Tipos.
-        _types2 = detailedPokemon2.types; // Tipos.
+        _types2 = detailedPokemon2.types;
+
+        ganador();
 
         _isLoading = false; // Fin de carga.
       });
@@ -125,10 +117,142 @@ class _ResultadoCompararState extends State<ResultadoComparar>
     super.dispose();
   }
 
-  void ganador() {}
+  void ganador() {
+    int statPoke1 = _getStat(_detailsPoke1, 'hp');
+    int statPoke2 = _getStat(_detailsPoke2, 'hp');
+
+    if (statPoke1 > statPoke2) {
+      puntajePoke1++;
+    } else if (statPoke1 < statPoke2) {
+      puntajePoke2++;
+    } else {
+      puntajePoke1++;
+      puntajePoke2++;
+    }
+
+    statPoke1 = _getStat(_detailsPoke1, 'attack');
+    statPoke2 = _getStat(_detailsPoke2, 'attack');
+
+    if (statPoke1 > statPoke2) {
+      puntajePoke1++;
+    } else if (statPoke1 < statPoke2) {
+      puntajePoke2++;
+    } else {
+      puntajePoke1++;
+      puntajePoke2++;
+    }
+
+    statPoke1 = _getStat(_detailsPoke1, 'defense');
+    statPoke2 = _getStat(_detailsPoke2, 'defense');
+
+    if (statPoke1 > statPoke2) {
+      puntajePoke1++;
+    } else if (statPoke1 < statPoke2) {
+      puntajePoke2++;
+    } else {
+      puntajePoke1++;
+      puntajePoke2++;
+    }
+
+    statPoke1 = _getStat(_detailsPoke1, 'special-attack');
+    statPoke2 = _getStat(_detailsPoke2, 'special-attack');
+
+    if (statPoke1 > statPoke2) {
+      puntajePoke1++;
+    } else if (statPoke1 < statPoke2) {
+      puntajePoke2++;
+    } else {
+      puntajePoke1++;
+      puntajePoke2++;
+    }
+
+    statPoke1 = _getStat(_detailsPoke1, 'special-defense');
+    statPoke2 = _getStat(_detailsPoke2, 'special-defense');
+
+    if (statPoke1 > statPoke2) {
+      puntajePoke1++;
+    } else if (statPoke1 < statPoke2) {
+      puntajePoke2++;
+    } else {
+      puntajePoke1++;
+      puntajePoke2++;
+    }
+
+    statPoke1 = _getStat(_detailsPoke1, 'speed');
+    statPoke2 = _getStat(_detailsPoke2, 'speed');
+
+    if (statPoke1 > statPoke2) {
+      puntajePoke1++;
+    } else if (statPoke1 < statPoke2) {
+      puntajePoke2++;
+    } else {
+      puntajePoke1++;
+      puntajePoke2++;
+    }
+
+    if (_weaknessesPoke1.isNotEmpty) {
+      for (var debilidad in _weaknessesPoke1) {
+        if (_types2.contains(debilidad)) puntajePoke1--;
+      }
+    }
+    if (_weaknessesPoke2.isNotEmpty) {
+      for (var debilidad in _weaknessesPoke2) {
+        if (_types1.contains(debilidad)) puntajePoke2--;
+      }
+    }
+  }
+
+  Widget _buildWinnerImage() {
+    final double availableHeight = 1000.0; // Valor de ejemplo
+
+    if (puntajePoke1 > puntajePoke2) {
+      final id1 = widget.pokemon1.url.split("/")[6];
+
+      return Image.network(
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id1.png',
+        width: MediaQuery.of(context).size.width * 0.4,
+        height: availableHeight * 0.4,
+        errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+      );
+    } else if (puntajePoke1 < puntajePoke2) {
+      final id2 = widget.pokemon2.url.split("/")[6];
+
+      return Image.network(
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id2.png',
+        width: MediaQuery.of(context).size.width * 0.4,
+        height: availableHeight * 0.4,
+        errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+      );
+    } else {
+      return const Text('¡Es un Empate!');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Resultados de la PokeComparación',
+            style: TextStyles.bodyText,
+          ),
+          backgroundColor: AppColors.backgroundComponentSelected,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_error.isNotEmpty) {
+      return Scaffold(
+        appBar: AppBar(/* ... */),
+        body: Center(child: Text('Error al cargar datos: $_error')),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -141,56 +265,44 @@ class _ResultadoCompararState extends State<ResultadoComparar>
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Expanded(
-        // Expande.
-        child: Column(
-          // Columna para título y chart.
-          mainAxisAlignment: MainAxisAlignment.start, // Arriba.
-          children: [
-            Padding(
-              // Padding título.
-              padding: const EdgeInsets.all(8.0), // All.
-              child: Text(
-                'Estadísticas de Poder',
-                style: TextStyles.bodyText, // Estilo.
+      body: Stack(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/ganador.jpg'),
+                fit: BoxFit.cover,
               ),
             ),
-            StatsChartWidget(stats: _detailsPoke1['stats']),
-            StatsChartWidget(stats: _detailsPoke2['stats']),
-            CharacteristicWidget(
-              title: 'Debilidades Pokemon 1:',
-              value: _weaknessesPoke1.isNotEmpty
-                  //? _weaknesses.join(', ').toUpperCase()
-                  ? _weaknessesPoke1
-                        .map(
-                          (t) =>
-                              traduccionesTipo[t.toLowerCase()] ??
-                              t, //traduce debilidades
-                        )
-                        .join(', ')
-                        .toUpperCase()
-                  : 'No disponible',
-              backgroundColor: AppColors.secondary,
-            ), // Widget extraído.
-
-            CharacteristicWidget(
-              title: 'Debilidades Pokemon 2:',
-              value: _weaknessesPoke2.isNotEmpty
-                  //? _weaknesses.join(', ').toUpperCase()
-                  ? _weaknessesPoke2
-                        .map(
-                          (t) =>
-                              traduccionesTipo[t.toLowerCase()] ??
-                              t, //traduce debilidades
-                        )
-                        .join(', ')
-                        .toUpperCase()
-                  : 'No disponible',
-              backgroundColor: AppColors.secondary,
-            ), // Widget extraído.
-          ],
-        ),
+            width: double.infinity,
+            height: double.infinity,
+          ),
+          Positioned(
+            top: 150, // Coordenada para la posición vertical
+            left:
+                MediaQuery.of(context).size.width *
+                0.04, // Centra horizontalmente
+            child: Center(
+              child: _buildWinnerImage(), //Imagen del ganador
+            ),
+          ),
+          Positioned(
+            bottom: 350, // Coloca el texto en la parte inferior
+            left: 0,
+            right: MediaQuery.of(context).size.width * -0.5,
+            child: Text(
+              '¡El ganador es...!',
+              textAlign: TextAlign.center,
+              style: TextStyles.bodyText.copyWith(
+                color: Colors.yellowAccent,
+                fontSize: 50,
+                shadows: [Shadow(blurRadius: 5.0, color: Colors.black)],
+              ),
+            ),
+          ),
+        ],
       ),
+      backgroundColor: Colors.white,
     );
   }
 }
