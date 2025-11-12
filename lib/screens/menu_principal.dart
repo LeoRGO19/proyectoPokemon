@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/screens/imc_pokedex_screen.dart';
+import 'package:pokedex/screens/selector_pokemon_screen.dart';
 
 class MenuPrincipal extends StatefulWidget {
   const MenuPrincipal({super.key});
@@ -40,8 +41,15 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: null,
-                child: Text("Otra funcionalidad", style: TextStyles.menuText),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SelectorPokemonScreen(),
+                    ),
+                  );
+                },
+                child: Text("PokeComparador", style: TextStyles.menuText),
               ),
 
               // Espacio para agregar más botones o widgets más adelante
