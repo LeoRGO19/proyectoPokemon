@@ -19,8 +19,8 @@ import 'package:pokedex/data/teamWatcher.dart';
 import 'package:pokedex/components/team_components/team.dart';
 
 class AdderPokemonScreen extends StatefulWidget {
-  final Team team;
-  const AdderPokemonScreen({super.key, required this.team});
+  final String title;
+  const AdderPokemonScreen({super.key, required this.title});
 
   @override
   State<AdderPokemonScreen> createState() => _AdderPokemonScreenState();
@@ -62,14 +62,17 @@ class _AdderPokemonScreenState extends State<AdderPokemonScreen>
   // Actualizado: Límite a Pokémon base completos (evita formas con datos incompletos)
   static const int _maxPokedexId = 1025; // Límite max ID.
 
+  late final Team team;
+  late final TeamsProvider teams;
+
   void _handlePokemonSelect(Pokemon pokemon) {
     setState(() {
       if (_seleccionPoke.contains(pokemon)) {
         // Deseleccionar
         _seleccionPoke.remove(pokemon);
-      } else if (_seleccionPoke.length < (6 - widget.team.deck.length)) {
+      } else if (_seleccionPoke.length < (6 - team.deck.length)) {
         // Seleccionar (si hay menos del maximo)
-        if (!widget.team.isTeamedUp(pokemon.name)) {
+        if (!team.isTeamedUp(pokemon.name)) {
           _seleccionPoke.add(pokemon);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -98,6 +101,10 @@ class _AdderPokemonScreenState extends State<AdderPokemonScreen>
           _hasMore) {
         _fetchPokemons(); // Carga más.
       }
+    });
+    setState(() {
+      teams = context.read<TeamsProvider>();
+      team = teams.getTeam(widget.title)!;
     });
   }
 
@@ -427,8 +434,6 @@ class _AdderPokemonScreenState extends State<AdderPokemonScreen>
 
   @override
   Widget build(BuildContext context) {
-    final teams = context.watch<TeamsProvider>();
-    final team = widget.team;
     final int max = 6 - team.deck.length;
     return Scaffold(
       appBar: AppBar(
@@ -448,10 +453,14 @@ class _AdderPokemonScreenState extends State<AdderPokemonScreen>
               style: TextStyles.bodyText,
             ),
             onPressed: () {
-              Navigator.of(context).pop();
               for (Pokemon pokemon in _seleccionPoke) {
                 teams.addPokemon(team, pokemon.name, context);
               }
+              teams.notify();
+              Navigator.of(context).pop();
+              /*for (Pokemon pokemon in _seleccionPoke) {
+                teams.addPokemon(team, pokemon.name, context);
+              }*/
             },
           ),
           SizedBox(width: 40),

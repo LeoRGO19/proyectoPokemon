@@ -11,6 +11,12 @@ class TeamsProvider extends ChangeNotifier {
     Team(title: 'Prueba 2'),
     Team(title: 'Prueba 3'),
   ];
+
+  void notify() {
+    notifyListeners();
+    print('notice');
+  }
+
   List<Team> getTeams() {
     return _teams;
   }
