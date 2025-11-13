@@ -253,7 +253,6 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                       color: AppColors.fontoTituloDetalle, // Negro.
                       child: Stack(
                         children: [
-                          // Widget 1 and Widget 2 (centered)
                           Align(
                             alignment: Alignment.center,
                             child: Row(
@@ -283,7 +282,9 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                             child: SizedBox(
                               width: titleHeight,
                               height: titleHeight,
-                              child: BotonEquipo(pokemon: widget.pokemon),
+                              child: BotonEquipo(
+                                pokemon: widget.pokemon,
+                              ), //boton para añadir pokemon a equipo
                             ),
                           ),
                         ],
@@ -629,7 +630,10 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
               style: TextStyles.bodyText, // Estilo.
             ),
           ),
-          StatsChartWidget(stats: _details['stats']), // Widget extraído.
+          StatsChartWidget(
+            stats: _details['stats'],
+            isTeam: false,
+          ), // Widget extraído.
         ],
       ),
     );

@@ -6,8 +6,13 @@ import 'package:pokedex/core/text_styles.dart';
 // Objetivo: Mostrar barras de stats de forma reusable.
 class StatsChartWidget extends StatelessWidget {
   final List<dynamic> stats;
+  final bool isTeam;
 
-  const StatsChartWidget({super.key, required this.stats});
+  const StatsChartWidget({
+    super.key,
+    required this.stats,
+    required this.isTeam,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +25,11 @@ class StatsChartWidget extends StatelessWidget {
       'Defensa especial',
       'Velocidad',
     ];
-    final statValues = stats
-        .map((s) => s['base_stat'] as int)
-        .toList(); // Extrae valores.
+    final statValues = (isTeam)
+        ? stats
+        : stats
+              .map((s) => s['base_stat'] as int)
+              .toList(); // Extrae valores, si es team ya están listos y promediados, si no hay que sacarlos
 
     return Column(
       // Columna de rows para cada stat.
