@@ -73,10 +73,34 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
             icon: Icon(Icons.info),
             tooltip: 'Ver estadísticas del equipo',
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => TeamStats(team: team)),
-              ); //redirige a las estadísticas de equipo
+              if (pokemons.length != 0) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TeamStats(team: team),
+                  ),
+                ); //redirige a las estadísticas de equipo
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Equipo vacío'),
+                      content: Text(
+                        'No se pueden ver la estadísticas de $title porque está vacío',
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // cierra dialog
+                          },
+                          child: const Text('Aceptar'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
             },
           ),
           IconButton(
