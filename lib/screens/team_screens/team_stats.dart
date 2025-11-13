@@ -27,11 +27,11 @@ class TeamStats extends StatefulWidget {
 }
 
 class _TeamStatsState extends State<TeamStats> {
-  Map<String, dynamic> _details = {}; // Detalles completos de Pokémon.
   List<Pokemon> pokemons = []; // Lista de evoluciones.
   List<String> _weaknesses = []; // Debilidades basadas en tipos.
   List<String> _types = []; // Tipos.
-  bool _isLoading = false; // Flag de carga.
+  List<String> _major = [];
+  bool _isLoading = true; // Flag de carga.
   String _error = ''; // Mensaje de error.
   //mapa con traducciones de tipo para utilizar al mostrarlas en la descripción del pokémon
   // hacemos esto de forma manual en vez de pedir este dato ya traducido desde la opkeapi porque eso consume AÚN más recursos
@@ -56,6 +56,151 @@ class _TeamStatsState extends State<TeamStats> {
     'normal': 'Normal',
   };
 
+  final Map<String, Map<String, double>> matrix_of_weakness = {
+    'grass': {
+      'grass': 0.5,
+      'fire': 2,
+      'water': 0.5,
+      'electric': 0.5,
+      'ice': 2,
+      'poison': 2,
+      'ground': 0.5,
+      'flying': 2,
+      'bug': 2,
+    },
+    'fire': {
+      'grass': 0.5,
+      'fire': 0.5,
+      'water': 2,
+      'ice': 0.5,
+      'ground': 2,
+      'bug': 0.5,
+      'rock': 2,
+      'steel': 0.5,
+      'fairy': 0.5,
+    },
+    'water': {
+      'grass': 2,
+      'fire': 0.5,
+      'water': 0.5,
+      'electric': 2,
+      'ice': 0.5,
+      'steel': 0.5,
+    },
+    'electric': {'electric': 0.5, 'ground': 2, 'flying': 0.5, 'steel': 0.5},
+    'ice': {'fire': 2, 'ice': 0.5, 'fighting': 2, 'rock': 2, 'steel': 2},
+    'fighting': {
+      'flying': 2,
+      'psychic': 2,
+      'bug': 0.5,
+      'rock': 0.5,
+      'dark': 0.5,
+      'fairy': 2,
+    },
+    'poison': {
+      'grass': 0.5,
+      'fighting': 0.5,
+      'poison': 0.5,
+      'ground': 2,
+      'psychic': 2,
+      'bug': 0.5,
+      'fairy': 0.5,
+    },
+    'ground': {
+      'grass': 2,
+      'water': 2,
+      'electric': 0.0,
+      'ice': 2,
+      'poison': 0.5,
+      'rock': 0.5,
+    },
+    'flying': {
+      'grass': 0.5,
+      'electric': 2,
+      'ice': 2,
+      'fighting': 0.5,
+      'ground': 0.0,
+      'bug': 0.5,
+      'rock': 2,
+    },
+    'psychic': {
+      'fighting': 0.5,
+      'psychic': 0.5,
+      'bug': 2,
+      'ghost': 2,
+      'dark': 2,
+    },
+    'bug': {
+      'grass': 0.5,
+      'fire': 2,
+      'fighting': 0.5,
+      'ground': 0.5,
+      'flying': 2,
+      'rock': 2,
+    },
+    'rock': {
+      'grass': 2,
+      'fire': 0.5,
+      'water': 2,
+      'fighting': 2,
+      'poison': 0.5,
+      'ground': 2,
+      'flying': 0.5,
+      'steel': 2,
+      'normal': 0.5,
+    },
+    'ghost': {
+      'fighting': 0.0,
+      'poison': 0.5,
+      'bug': 0.5,
+      'ghost': 2,
+      'dark': 2,
+      'normal': 0.0,
+    },
+    'dragon': {
+      'grass': 0.5,
+      'fire': 0.5,
+      'water': 0.5,
+      'electric': 0.5,
+      'ice': 2,
+      'dragon': 2,
+      'fairy': 2,
+    },
+    'dark': {
+      'fighting': 2,
+      'psychic': 0.0,
+      'bug': 2,
+      'ghost': 0.5,
+      'dark': 0.5,
+      'fairy': 2,
+    },
+    'steel': {
+      'grass': 0.5,
+      'fire': 2,
+      'ice': 0.5,
+      'fighting': 2,
+      'poison': 0.0,
+      'ground': 2,
+      'flying': 0.5,
+      'psychic': 0.5,
+      'bug': 0.5,
+      'rock': 0.5,
+      'dragon': 0.5,
+      'steel': 0.5,
+      'fairy': 0.5,
+      'normal': 0.5,
+    },
+    'fairy': {
+      'fighting': 0.5,
+      'poison': 2,
+      'bug': 0.5,
+      'dragon': 0.0,
+      'dark': 0.5,
+      'steel': 2,
+    },
+    'normal': {'fighting': 2, 'ghost': 0},
+  };
+
   final ScrollController _scrollController =
       ScrollController(); // Controller para scroll en derecha.
 
@@ -64,6 +209,27 @@ class _TeamStatsState extends State<TeamStats> {
     // Limpia recursos.
     _scrollController.dispose(); // Libera controller.
     super.dispose(); // Super dispose.
+  }
+
+  @override
+  void initState() {
+    // Inicializa estado.
+    super.initState(); // Llama super.
+    _fetchDetails(); // Inicia fetch asíncrono.
+  }
+
+  Future<void> _fetchDetails() async {
+    // Función para fetch todos los datos.
+    final getWeak = await getWeakessesInCommon();
+    if (getWeak != null) {
+      setState(() {
+        // Actualiza estado.
+        _weaknesses = getWeak; // Debilidades en comun
+        _types = getTypesInCommon(); //tipos en comun
+        _major = getDebilitatingWeaknesses(); //debilidades fuertes
+        _isLoading = false; // Fin de carga.
+      });
+    }
   }
 
   @override
@@ -346,8 +512,8 @@ class _TeamStatsState extends State<TeamStats> {
                 // Columna de características.
                 crossAxisAlignment: CrossAxisAlignment.start, // Izquierda.
                 children: [
-                  /* CharacteristicWidget(
-                    title: 'Tipo:',
+                  CharacteristicWidget(
+                    title: 'Tipos más comunes:',
                     value: _types.isNotEmpty
                         //? _types.join(', ').toUpperCase()
                         ? _types
@@ -358,13 +524,12 @@ class _TeamStatsState extends State<TeamStats> {
                               )
                               .join(', ')
                               .toUpperCase()
-                        : 'No disponible',
+                        : 'No hay tipos compartidos por al menos la mitad del equipo',
                     backgroundColor: AppColors.primary,
                   ),
                   CharacteristicWidget(
-                    title: 'Debilidades:',
+                    title: 'Debilidades más comunes:',
                     value: _weaknesses.isNotEmpty
-                        //? _weaknesses.join(', ').toUpperCase()
                         ? _weaknesses
                               .map(
                                 (t) =>
@@ -373,9 +538,24 @@ class _TeamStatsState extends State<TeamStats> {
                               )
                               .join(', ')
                               .toUpperCase()
-                        : 'No disponible',
+                        : 'No hay debilidades compartidas por al menos la mitad del equipo',
                     backgroundColor: AppColors.secondary,
-                  ),*/
+                  ),
+                  CharacteristicWidget(
+                    title: 'Debilidades importantes:',
+                    value: _major.isNotEmpty
+                        //? _types.join(', ').toUpperCase()
+                        ? _major
+                              .map(
+                                (t) =>
+                                    traduccionesTipo[t.toLowerCase()] ??
+                                    t, //traduce los tipos
+                              )
+                              .join(', ')
+                              .toUpperCase()
+                        : 'No hay debilidades importantes (ataque x2) compartidos por al menos la mitad del equipo',
+                    backgroundColor: AppColors.primary,
+                  ),
                 ],
               ),
             ),
@@ -438,6 +618,143 @@ class _TeamStatsState extends State<TeamStats> {
       sdf ~/ total,
       spd ~/ total,
     ];
+  }
+
+  Future<List<String>> getWeakessesInCommon() async {
+    final List<String> common = [];
+    Map<String, int> weak = {
+      'grass': 0,
+      'fire': 0,
+      'water': 0,
+      'electric': 0,
+      'ice': 0,
+      'fighting': 0,
+      'poison': 0,
+      'ground': 0,
+      'flying': 0,
+      'psychic': 0,
+      'bug': 0,
+      'rock': 0,
+      'ghost': 0,
+      'dragon': 0,
+      'dark': 0,
+      'steel': 0,
+      'fairy': 0,
+      'normal': 0,
+    };
+    pokemons = widget.team.pokemons;
+    int min = (pokemons.length == 2)
+        ? 2
+        : (pokemons.length ~/ 2 + pokemons.length % 2);
+    for (Pokemon poke in pokemons) {
+      final weaknesses = await PokeApi.fetchWeaknesses(
+        poke.types,
+      ); // Debilidades.
+      weak.forEach((key, value) {
+        if (weaknesses.contains(key)) {
+          setState(() {
+            weak.update(key, (value) => value + 1);
+          });
+        }
+      });
+    }
+    weak.forEach((key, value) {
+      if (value >= min) {
+        common.add(key);
+      }
+    });
+    return common;
+  }
+
+  List<String> getTypesInCommon() {
+    final List<String> common = [];
+    Map<String, int> types = {
+      'grass': 0,
+      'fire': 0,
+      'water': 0,
+      'electric': 0,
+      'ice': 0,
+      'fighting': 0,
+      'poison': 0,
+      'ground': 0,
+      'flying': 0,
+      'psychic': 0,
+      'bug': 0,
+      'rock': 0,
+      'ghost': 0,
+      'dragon': 0,
+      'dark': 0,
+      'steel': 0,
+      'fairy': 0,
+      'normal': 0,
+    };
+    pokemons = widget.team.pokemons;
+    int min = (pokemons.length == 2)
+        ? 2
+        : (pokemons.length ~/ 2 + pokemons.length % 2);
+    for (Pokemon poke in pokemons) {
+      final type = poke.types;
+      types.forEach((key, value) {
+        if (type.contains(key)) {
+          setState(() {
+            types.update(key, (value) => value + 1);
+          });
+        }
+      });
+    }
+    types.forEach((key, value) {
+      if (value >= min) {
+        common.add(key);
+      }
+    });
+    return common;
+  }
+
+  List<String> getDebilitatingWeaknesses() {
+    Map<String, int> weak = {
+      'grass': 0,
+      'fire': 0,
+      'water': 0,
+      'electric': 0,
+      'ice': 0,
+      'fighting': 0,
+      'poison': 0,
+      'ground': 0,
+      'flying': 0,
+      'psychic': 0,
+      'bug': 0,
+      'rock': 0,
+      'ghost': 0,
+      'dragon': 0,
+      'dark': 0,
+      'steel': 0,
+      'fairy': 0,
+      'normal': 0,
+    };
+    final List<String> common = [];
+    pokemons = widget.team.pokemons;
+    int min = (pokemons.length == 2)
+        ? 2
+        : (pokemons.length ~/ 2 + pokemons.length % 2);
+    for (Pokemon poke in pokemons) {
+      final type = poke.types;
+      for (String tipo in type) {
+        Map<String, double> sub = matrix_of_weakness[tipo]!;
+        sub.forEach((key, value) {
+          if (value == 2) {
+            setState(() {
+              weak.update(key, (value) => value + 1);
+            });
+          }
+        });
+      }
+    }
+    weak.forEach((key, value) {
+      if (value >= min) {
+        common.add(key);
+      }
+    });
+    return common;
   }
 
   AppBar AppBarForMenuButton(BuildContext context) {
