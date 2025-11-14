@@ -41,10 +41,11 @@ class _TeamManagerState extends State<TeamManager> {
             ListView.builder(
               itemCount: _items.length,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  // Contenedor título.
-                  height: 300,
-                  width: double.infinity,
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: 300,
+                    maxHeight: 360, // puedes ajustarlo
+                  ),
                   child: TeamVisualizer(team: _items[index]),
                 );
               },

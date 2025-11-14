@@ -57,6 +57,58 @@ class TeamsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void editNotes(BuildContext context, Team team) {
+    String initial = team.notes;
+    final controller = TextEditingController(text: initial);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Notas sobre el equipo"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: controller,
+                    maxLines: null,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      labelText: "  Notas",
+                      //border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancelar"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final text = controller.text.trim();
+
+                    if (text.isEmpty) {
+                      setState(() {});
+                      return;
+                    }
+                    team.editNotes(text);
+                    notifyListeners();
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Guardar"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void namingTeam(
     BuildContext context,
     bool creating,

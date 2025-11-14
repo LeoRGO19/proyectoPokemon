@@ -70,6 +70,13 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
         ),
         actions: [
           IconButton(
+            icon: Icon(Icons.note_add_outlined),
+            tooltip: 'Agregar notas',
+            onPressed: () {
+              teams.editNotes(context, team);
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.info),
             tooltip: 'Ver estadísticas del equipo',
             onPressed: () {
@@ -155,7 +162,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
           } // Indicator.
           return Center(
             child: GridView.builder(
-              padding: const EdgeInsets.all(6.0),
+              padding: const EdgeInsets.all(8.0),
               itemCount: (pokemons.length < 6)
                   ? pokemons.length + 1
                   : pokemons.length,

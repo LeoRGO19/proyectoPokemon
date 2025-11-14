@@ -9,6 +9,7 @@ class Team {
   final Set<String> deck = {};
   final List<Pokemon> pokemons = [];
   final Map<String, dynamic> details = {};
+  String notes = '';
 
   Team({required this.title});
 
@@ -59,12 +60,9 @@ class Team {
     title = name;
   }
 
-  /* String pp() {
-    if (deck.isEmpty) {
-      return deck.toString();
-    } else
-      return "Está vacio";
-  }*/
+  void editNotes(String notas) {
+    notes = notas;
+  }
 
   void _showMyDialog(BuildContext context) {
     showDialog(

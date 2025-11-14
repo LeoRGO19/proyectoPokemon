@@ -525,6 +525,10 @@ class _TeamStatsState extends State<TeamStats> {
                                       children: [
                                         // Estadísticas (50% del ancho de la columna izquierda)
                                         stats(),
+                                        SizedBox(
+                                          height: availableHeight * 0.60,
+                                          width: 10,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -635,7 +639,7 @@ class _TeamStatsState extends State<TeamStats> {
                               ],
                             ),
                           ),
-                          characteristics(),
+                          characteristics(context.watch<TeamsProvider>()),
                         ],
                       ),
                     ),
@@ -646,7 +650,7 @@ class _TeamStatsState extends State<TeamStats> {
     );
   }
 
-  Expanded characteristics() {
+  Expanded characteristics(TeamsProvider teams) {
     return Expanded(
       // Expande.
       child: Padding(
@@ -751,6 +755,19 @@ class _TeamStatsState extends State<TeamStats> {
                               .toUpperCase()
                         : 'No hay tipos contra los que al menos la mitad del equipo hace más daño',
                     backgroundColor: AppColors.primary,
+                  ),
+                  Visibility(
+                    visible: widget.team.notes != '',
+                    child: InkWell(
+                      onTap: () {
+                        teams.editNotes(context, widget.team);
+                      },
+                      child: CharacteristicWidget(
+                        title: 'Notas sobre el equipo:',
+                        value: widget.team.notes,
+                        backgroundColor: AppColors.primary,
+                      ),
+                    ),
                   ),
                 ],
               ),
