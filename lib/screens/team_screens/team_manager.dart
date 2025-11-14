@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/components/team_components/team_visualizer.dart';
-import 'package:pokedex/components/team_components/team.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/data/teamWatcher.dart';

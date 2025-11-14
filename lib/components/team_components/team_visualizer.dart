@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/components/team_components/team.dart';
 import 'package:pokedex/core/text_styles.dart';
-import 'package:pokedex/core/app_colors.dart';
-import 'package:pokedex/data/pokeapi.dart';
 import 'package:pokedex/data/teamWatcher.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/screens/team_screens/team_stats.dart';
@@ -20,26 +18,11 @@ class TeamVisualizer extends StatefulWidget {
 
 class _TeamVisualizerState extends State<TeamVisualizer> {
   late List<Pokemon> pokemons;
-  /* @override
-  void initState() {
-    super.initState();
-    pokemons = widget.team.pokemons;
-  }*/
-
   @override
   Widget build(BuildContext context) {
     final teams = context.watch<TeamsProvider>();
     final String title = widget.team.title;
     final team = teams.getTeam(title)!;
-
-    /*if (widget.team.deck.isEmpty) {
-      // Si vacío
-      return Center(
-        child: Text(title + " está vacio"), // Mensaje.
-      );
-    }*/ /* else if (pokemons.isEmpty) {
-      return Center(child: CircularProgressIndicator());
-    }*/
 
     return Scaffold(
       // Scaffold base.

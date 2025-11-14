@@ -17,7 +17,7 @@ class BotonEquipo extends StatefulWidget {
 class _BotonEquipoState extends State<BotonEquipo> {
   @override
   Widget build(BuildContext context) {
-    final teams = context.watch<TeamsProvider>();
+    //final teams = context.watch<TeamsProvider>();
     return IconButton(
       onPressed: () {
         //print("hola");

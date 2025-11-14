@@ -76,7 +76,7 @@ class TeamsProvider extends ChangeNotifier {
                     maxLines: null,
                     autofocus: true,
                     decoration: InputDecoration(
-                      labelText: "  Notas",
+                      // labelText: "  Notas",
                       //border: const OutlineInputBorder(),
                     ),
                   ),

@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:pokedex/components/team_components/team_visualizer.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/components/team_components/team.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/data/teamWatcher.dart';
 import 'package:provider/provider.dart';
-
-import 'package:pokedex/components/team_components/add.dart';
-import 'package:pokedex/data/exception_handler.dart';
 import 'package:pokedex/data/pokeapi.dart';
 //import 'package:pokedex/exceptions/exceptions.dart';
 import 'package:pokedex/screens/menu_principal.dart';
-import 'package:http/http.dart' as http;
 import 'package:pokedex/components/characteristic_widget.dart';
 import 'package:pokedex/components/pokedex_components/stats_chart_widget.dart';
-import 'package:pokedex/components/pokedex_components/fav.dart';
 import 'package:pokedex/screens/imc_pokemon_details.dart';
 
 //boton que permite agregar pokemon a equipo
@@ -386,18 +380,17 @@ class _TeamStatsState extends State<TeamStats> {
   Future<void> _fetchDetails() async {
     // Función para fetch todos los datos.
     final getWeak = await getWeakessesInCommon();
-    if (getWeak != null) {
-      setState(() {
-        // Actualiza estado.
-        _weaknesses = getWeak; // Debilidades en comun
-        _types = getTypesInCommon(); //tipos en comun
-        _major = getDebilitatingWeaknesses(); //debilidades fuertes
-        _inmunity =
-            getParcialInmunity(); //inmunidades compartidas por más de la mitad del equipo
-        _attacks = getStrongerAttacks(); //ataques son mas fuertes en esos tipos
-        _isLoading = false; // Fin de carga.
-      });
-    }
+
+    setState(() {
+      // Actualiza estado.
+      _weaknesses = getWeak; // Debilidades en comun
+      _types = getTypesInCommon(); //tipos en comun
+      _major = getDebilitatingWeaknesses(); //debilidades fuertes
+      _inmunity =
+          getParcialInmunity(); //inmunidades compartidas por más de la mitad del equipo
+      _attacks = getStrongerAttacks(); //ataques son mas fuertes en esos tipos
+      _isLoading = false; // Fin de carga.
+    });
   }
 
   @override
@@ -527,7 +520,8 @@ class _TeamStatsState extends State<TeamStats> {
                                         stats(),
                                         SizedBox(
                                           height: availableHeight * 0.60,
-                                          width: 10,
+                                          width: 100,
+                                          child: Text(''),
                                         ),
                                       ],
                                     ),
@@ -813,9 +807,7 @@ class _TeamStatsState extends State<TeamStats> {
     int spd = 0;
     for (Pokemon poke in pokemons) {
       List<dynamic> stats = widget.team.details[poke.name]?['stats'];
-      List<int> statValues = (stats as List<dynamic>)
-          .map((s) => s['base_stat'] as int)
-          .toList();
+      List<int> statValues = (stats).map((s) => s['base_stat'] as int).toList();
       hp += statValues[0];
       atk += statValues[1];
       df += statValues[2];

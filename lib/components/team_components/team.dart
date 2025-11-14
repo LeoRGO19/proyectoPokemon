@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/screens/team_screens/team_manager.dart';
 import 'package:pokedex/data/pokeapi.dart';
-import 'package:http/http.dart' as http;
 
 class Team {
   String title;
@@ -108,5 +107,6 @@ class Team {
     } catch (e) {
       print(e);
     }
+    return null;
   }
 }
