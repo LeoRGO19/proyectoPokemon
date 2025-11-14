@@ -4,20 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pokedex/components/team_components/team.dart';
 
-/*clase que sirve para notificar a todos los listeners asociados que un pokémon fue agregado o removido de favoritos, 
-permitiendo que todas las iteraciones de este reflejen los cambios (como es en el caso de pokémon creados por la cadena evolutiva, 
-que son diferentes a los pokémon de la lista principal de la pokédex)*/
+/*clase que sirve para notificar a todos los listeners asociados que un equipo fue creado o eliminado, de si se le cambió el nombre, 
+, se le agregaron notas o se agregaron o eliminaron notas;permitiendo que todas las iteraciones de estos reflejen los cambios, y los pokemon sepan a qué equipo(s) pertenecen */
 class TeamsProvider extends ChangeNotifier {
   final List<Team> _teams = [];
 
   TeamsProvider() {
     _loadTeams();
-  }
+  } //carga equipos desde memoria
 
-  ///carga la lista de favoritos desde SharedPreferences
+  ///carga la lista de equipos desde SharedPreferences
   Future<void> _loadTeams() async {
     final prefs = await SharedPreferences.getInstance();
-    //prefs.clear();
+    //prefs.clear(); esto es por si la memoria se "corrompe" o queda con cosas innecesarias
     final List<String>? storedList = prefs.getStringList("teams");
     if (storedList != null) {
       _teams.addAll(toTeam(storedList));
@@ -25,12 +24,13 @@ class TeamsProvider extends ChangeNotifier {
     }
   }
 
-  //guarda los favoritos en shared preferences
+  //guarda los equipos en shared preferences, transformando cada uno en map y agregandolo a una lista
   Future<void> _saveTeams() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList("teams", toIterable(_teams));
   }
 
+  //cuando carga lista desde memoria cada map lo transforma en equipo y lo agrega a la lista de equipos
   List<Team> toTeam(List<String> saved) {
     List<Team> equipos = [];
 
@@ -42,19 +42,22 @@ class TeamsProvider extends ChangeNotifier {
     return equipos;
   }
 
+  //transforma la lista de equipos en una lista de string, esto pasando cada lista a map y luego los map a string
   List<String> toIterable(List<Team> equipos) {
     return equipos.map((team) => jsonEncode(team.toMap())).toList();
   }
 
+  //metodo auxiliar por si hay que notificar de algo
   void notify() {
     notifyListeners();
-    //print('notice');
   }
 
+  //retorna equipos
   List<Team> getTeams() {
     return _teams;
   }
 
+  //retorna equipo basado en su nombre
   Team? getTeam(String equipo) {
     for (Team team in _teams) {
       if (team.title.toLowerCase() == equipo.toLowerCase()) {
@@ -64,12 +67,14 @@ class TeamsProvider extends ChangeNotifier {
     return null;
   }
 
+  //añade pokemon a equipo y avisa a listeners
   void addPokemon(Team team, String name, BuildContext context) async {
     team.add(name, context, onUpdated: notifyListeners);
     notifyListeners();
     await _saveTeams();
   }
 
+  //saca pokemon de equipo y avisa a listeners
   void removePokemon(Team team, String name) async {
     if (team.isTeamedUp(name)) {
       team.remove(name);
@@ -78,24 +83,28 @@ class TeamsProvider extends ChangeNotifier {
     }
   }
 
+  //crea team y lo añade a lista
   void addTeam(String equipo) async {
     _teams.add(Team(title: equipo));
     notifyListeners();
     await _saveTeams();
   }
 
+  //saca equipo de la lista, "borrándolo"
   void removeTeam(Team team) async {
     _teams.remove(team);
     notifyListeners();
     await _saveTeams();
   }
 
+  //renombra equipo
   void renamingTeam(Team team, String name) async {
     team.renameTeam(name);
     notifyListeners();
     await _saveTeams();
   }
 
+  //despliega dialog que permite editar las notas de un equipo dado
   void editNotes(BuildContext context, Team team) async {
     String initial = team.notes;
     final controller = TextEditingController(text: initial);
@@ -114,10 +123,7 @@ class TeamsProvider extends ChangeNotifier {
                     controller: controller,
                     maxLines: null,
                     autofocus: true,
-                    decoration: InputDecoration(
-                      // labelText: "  Notas",
-                      //border: const OutlineInputBorder(),
-                    ),
+                    decoration: InputDecoration(),
                   ),
                 ],
               ),
@@ -133,7 +139,7 @@ class TeamsProvider extends ChangeNotifier {
                     if (text.isEmpty) {
                       setState(() {});
                       return;
-                    }
+                    } //si no se ha ingresado nada no permite mandar
                     team.editNotes(text);
                     notifyListeners();
                     await _saveTeams();
@@ -149,6 +155,7 @@ class TeamsProvider extends ChangeNotifier {
     );
   }
 
+  //despliega dialog que dependiendo de parametros nombra equipo nuevo o renombra equipo ya creado
   void namingTeam(
     BuildContext context,
     bool creating,

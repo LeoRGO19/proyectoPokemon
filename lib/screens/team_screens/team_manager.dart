@@ -22,8 +22,8 @@ class _TeamManagerState extends State<TeamManager> {
 
   @override
   Widget build(BuildContext context) {
-    final teams = context.watch<TeamsProvider>();
-    final _items = teams.getTeams();
+    final teams = context.watch<TeamsProvider>(); //proveedor de equipos
+    final _items = teams.getTeams(); //obtiene equipos
     return Scaffold(
       appBar: AppBar(
         title: Text('Manejador de Equipos', style: TextStyles.bodyText),
@@ -41,16 +41,12 @@ class _TeamManagerState extends State<TeamManager> {
               itemCount: _items.length,
               itemBuilder: (BuildContext context, int index) {
                 return ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: 300,
-                    maxHeight: 360, // puedes ajustarlo
-                  ),
-                  child: TeamVisualizer(team: _items[index]),
+                  constraints: BoxConstraints(minHeight: 300, maxHeight: 360),
+                  child: TeamVisualizer(
+                    team: _items[index],
+                  ), //llama a visualizador de equipo
                 );
               },
-              /*separatorBuilder: (BuildContext context, int index) {
-            return Divider();
-          },*/
             ),
             Positioned(
               bottom: 16,

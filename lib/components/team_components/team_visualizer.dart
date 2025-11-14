@@ -8,7 +8,7 @@ import 'package:pokedex/screens/team_screens/team_stats.dart';
 import 'package:pokedex/screens/imc_pokemon_details.dart';
 import 'package:pokedex/screens/team_screens/team_adder.dart';
 
-//boton que visualizar e interactuar con equipo
+//boton que permite visualizar e interactuar con equipo
 class TeamVisualizer extends StatefulWidget {
   final Team team;
   const TeamVisualizer({super.key, required this.team});
@@ -20,9 +20,11 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
   late List<Pokemon> pokemons;
   @override
   Widget build(BuildContext context) {
-    final teams = context.watch<TeamsProvider>();
-    final String title = widget.team.title;
-    final team = teams.getTeam(title)!;
+    final teams = context.watch<TeamsProvider>(); //llama a provider
+    final String title = widget.team.title; //titulo del team
+    final team = teams.getTeam(
+      title,
+    )!; //llama al team de nuevo por el nombre, esto permite evitar una variable "stale"
 
     return Scaffold(
       // Scaffold base.
@@ -46,7 +48,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                   onPressed: () {
                     teams.namingTeam(context, false, title, team);
                   },
-                ),
+                ), //llama a dialog para cambiar nombre de equipo
               ],
             );
           },
@@ -57,7 +59,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
             tooltip: 'Agregar notas',
             onPressed: () {
               teams.editNotes(context, team);
-            },
+            }, //llama dialog para editar o crear notas
           ),
           IconButton(
             icon: Icon(Icons.info),
@@ -89,7 +91,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                       ],
                     );
                   },
-                );
+                ); //si el equipo está vacío no abre estadísticas
               }
             },
           ),
@@ -124,13 +126,9 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                 },
               );
             },
-          ),
+          ), //botón para eliminar al equipo (con todo lo que eso incluye)
         ],
         backgroundColor: const Color.fromARGB(255, 241, 87, 87),
-        /*leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),*/
       ),
       body: Consumer<TeamsProvider>(
         //para que "escuche" cambios en los equipos
@@ -142,7 +140,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
           if (pokemons.isEmpty && team.deck.isNotEmpty) {
             // Condicional para loading.
             return Center(child: CircularProgressIndicator());
-          } // Indicator.
+          } // Indicator
           return Center(
             child: GridView.builder(
               padding: const EdgeInsets.all(8.0),
@@ -165,7 +163,9 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                     ),
                     child: Center(
                       child: (pokemons.length != team.deck.length)
-                          ? Center(child: CircularProgressIndicator())
+                          ? Center(
+                              child: CircularProgressIndicator(),
+                            ) //si no han cargado todos los pokemon sale circulo de carga y no permite añadir pokemon
                           : IconButton(
                               onPressed: () async {
                                 await Navigator.push(
@@ -183,7 +183,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                                 size: 60.0,
                                 color: Colors.blueGrey,
                               ),
-                            ),
+                            ), //boton que lleva a pantalla para agregar pokemon al equipo
                     ),
                   );
                 } else {
@@ -261,7 +261,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                                 ],
                               ),
                             ),
-                          ),
+                          ), //tarjeta con nombre, id e imagen del pokémon
                           Positioned(
                             bottom: 0.0,
                             right: 0.0,
@@ -319,7 +319,7 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                                 ),
                               ),
                             ),
-                          ),
+                          ), //boton para sacar al pokemon del equipo
                         ],
                       ),
                     );
@@ -332,7 +332,8 @@ class _TeamVisualizerState extends State<TeamVisualizer> {
                   }
                 }
               },
-              physics: NeverScrollableScrollPhysics(),
+              physics:
+                  NeverScrollableScrollPhysics(), //evita que se pueda scrollear, pues todo debería calzar
               shrinkWrap: true,
             ),
           );

@@ -632,7 +632,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           ),
           StatsChartWidget(
             stats: _details['stats'],
-            isTeam: false,
+            isTeam:
+                false, //no es team, así que stats sabe que le están dando un map
           ), // Widget extraído.
         ],
       ),

@@ -10,8 +10,12 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => FavoritesProvider()),
-        ChangeNotifierProvider(create: (context) => TeamsProvider()),
+        ChangeNotifierProvider(
+          create: (context) => FavoritesProvider(),
+        ), //provider de favoritos
+        ChangeNotifierProvider(
+          create: (context) => TeamsProvider(),
+        ), //provider de equipos
       ],
       child: const MainApp(),
     ),

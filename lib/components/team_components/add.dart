@@ -20,7 +20,6 @@ class _BotonEquipoState extends State<BotonEquipo> {
     //final teams = context.watch<TeamsProvider>();
     return IconButton(
       onPressed: () {
-        //print("hola");
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -33,7 +32,7 @@ class _BotonEquipoState extends State<BotonEquipo> {
                     child: Consumer<TeamsProvider>(
                       //para que "escuche" cambios en los equipos
                       builder: (context, teams, _) {
-                        final _items = teams.getTeams();
+                        final _items = teams.getTeams(); //obtiene equipos
                         return Column(
                           children: [
                             const Padding(
@@ -70,7 +69,7 @@ class _BotonEquipoState extends State<BotonEquipo> {
                                           title: Text(
                                             team.title,
                                             style: TextStyles.cardText,
-                                          ), // Título de categoría.
+                                          ), // titulo del equipo
                                           value:
                                               isSelected, // Valor del checkbox.
                                           onChanged: (value) {
@@ -85,12 +84,12 @@ class _BotonEquipoState extends State<BotonEquipo> {
                                                     team,
                                                     widget.pokemon.name,
                                                     context,
-                                                  );
+                                                  ); //agrega pokemon a equipo
                                                 } else {
                                                   teams.removePokemon(
                                                     team,
                                                     widget.pokemon.name,
-                                                  );
+                                                  ); //saca al pokemon del equipo
                                                 }
                                               });
                                             }
@@ -127,7 +126,7 @@ class _BotonEquipoState extends State<BotonEquipo> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: TextButton(
-                                child: const Text('Cerrar'),
+                                child: const Text('Cerrar'), //cierra dialog
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
@@ -144,7 +143,7 @@ class _BotonEquipoState extends State<BotonEquipo> {
           },
         );
       },
-      icon: Icon(Icons.add, size: 24.0, color: Colors.yellow),
+      icon: Icon(Icons.add, size: 24.0, color: Colors.yellow), //signo más
     );
   }
 }

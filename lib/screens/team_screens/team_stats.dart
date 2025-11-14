@@ -6,13 +6,12 @@ import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/data/teamWatcher.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/data/pokeapi.dart';
-//import 'package:pokedex/exceptions/exceptions.dart';
 import 'package:pokedex/screens/menu_principal.dart';
 import 'package:pokedex/components/characteristic_widget.dart';
 import 'package:pokedex/components/pokedex_components/stats_chart_widget.dart';
 import 'package:pokedex/screens/imc_pokemon_details.dart';
 
-//boton que permite agregar pokemon a equipo
+//pantalla que despliega detalles del eequipo
 class TeamStats extends StatefulWidget {
   final Team team;
   const TeamStats({super.key, required this.team});
@@ -24,13 +23,15 @@ class _TeamStatsState extends State<TeamStats> {
   List<Pokemon> pokemons = []; // Lista de evoluciones.
   List<String> _weaknesses = []; // Debilidades basadas en tipos.
   List<String> _types = []; // Tipos.
-  List<String> _major = [];
-  List<String> _inmunity = [];
-  List<String> _attacks = [];
+  List<String> _major = []; //debilidades importantes
+  List<String> _inmunity =
+      []; //inmunidades compartidas por al menos la mitad del equipo
+  List<String> _attacks =
+      []; //tipos contra los que al menos la mitad del equipo es efectivo
   bool _isLoading = true; // Flag de carga.
   String _error = ''; // Mensaje de error.
-  //mapa con traducciones de tipo para utilizar al mostrarlas en la descripción del pokémon
-  // hacemos esto de forma manual en vez de pedir este dato ya traducido desde la opkeapi porque eso consume AÚN más recursos
+  /*mapa con traducciones de tipo para utilizar al mostrarlas en la descripción del pokémon
+   hacemos esto de forma manual en vez de pedir este dato ya traducido desde la opkeapi porque eso consume AÚN más recursos*/
   static const Map<String, String> traduccionesTipo = {
     'grass': 'Planta',
     'fire': 'Fuego',
@@ -52,6 +53,7 @@ class _TeamStatsState extends State<TeamStats> {
     'normal': 'Normal',
   };
 
+  //matriz que tiene daño hecho por tipos, los tipos que no salen hacen daño normal y los ceros son inmunidades
   final Map<String, Map<String, double>> matrix_of_weakness = {
     'grass': {
       'grass': 0.5,
@@ -197,6 +199,7 @@ class _TeamStatsState extends State<TeamStats> {
     'normal': {'fighting': 2, 'ghost': 0},
   };
 
+  //matriz que tiene daño hecho a tipos, los tipos que no salen hacen daño normal  y los ceros son inmunidades
   final Map<String, Map<String, double>> attack_matrix = {
     'grass': {
       'grass': 0.5,
@@ -499,7 +502,7 @@ class _TeamStatsState extends State<TeamStats> {
                             child: Column(
                               // Columna para bloques superior/inferior.
                               children: [
-                                // Bloque superior: GIF y estadísticas (60% de la altura disponible)
+                                // Bloque superior: estadísticas (60% de la altura disponible)
                                 Padding(
                                   // Padding alrededor.
                                   padding: const EdgeInsets.only(
@@ -522,12 +525,12 @@ class _TeamStatsState extends State<TeamStats> {
                                           height: availableHeight * 0.60,
                                           width: 150,
                                           child: Text(''),
-                                        ),
+                                        ), //sizedbox vacío para limitar tamaño de stats
                                       ],
                                     ),
                                   ),
                                 ),
-                                // Bloque inferior: Evoluciones (35% de la altura disponible)
+                                // Bloque inferior: Evoluciones (30% de la altura disponible)
                                 Padding(
                                   // Padding alrededor.
                                   padding: const EdgeInsets.only(
@@ -681,7 +684,6 @@ class _TeamStatsState extends State<TeamStats> {
                   CharacteristicWidget(
                     title: 'Tipos más comunes:',
                     value: _types.isNotEmpty
-                        //? _types.join(', ').toUpperCase()
                         ? _types
                               .map(
                                 (t) =>
@@ -710,7 +712,6 @@ class _TeamStatsState extends State<TeamStats> {
                   CharacteristicWidget(
                     title: 'Debilidades importantes:',
                     value: _major.isNotEmpty
-                        //? _types.join(', ').toUpperCase()
                         ? _major
                               .map(
                                 (t) =>
@@ -760,7 +761,7 @@ class _TeamStatsState extends State<TeamStats> {
                         title: 'Notas sobre el equipo:',
                         value: widget.team.notes,
                         backgroundColor: AppColors.primary,
-                      ),
+                      ), //notas hechas sobre el equipo, si se apreta se pueden editar
                     ),
                   ),
                 ],
@@ -776,7 +777,7 @@ class _TeamStatsState extends State<TeamStats> {
     return Expanded(
       // Expande.
       child: Column(
-        // Columna para título y chart.
+        // Columna para título y chart
         mainAxisAlignment: MainAxisAlignment.start, // Arriba.
         children: [
           Padding(
@@ -790,12 +791,13 @@ class _TeamStatsState extends State<TeamStats> {
           StatsChartWidget(
             stats: calculateStats(),
             isTeam: true,
-          ), // Widget extraído.
+          ), // le pasamos estadísticas promediadas
         ],
       ),
     );
   }
 
+  //promedia estadísticas
   List<int> calculateStats() {
     pokemons = widget.team.pokemons;
     int total = pokemons.length;
@@ -825,6 +827,7 @@ class _TeamStatsState extends State<TeamStats> {
     ];
   }
 
+  //busca debilidades que se comparten por más de la mitad del equipo
   Future<List<String>> getWeakessesInCommon() async {
     final List<String> common = [];
     Map<String, int> weak = {
@@ -871,6 +874,7 @@ class _TeamStatsState extends State<TeamStats> {
     return common;
   }
 
+  //tipos que se repiten en al menos la mitad del equipo
   List<String> getTypesInCommon() {
     final List<String> common = [];
     Map<String, int> types = {
@@ -915,6 +919,7 @@ class _TeamStatsState extends State<TeamStats> {
     return common;
   }
 
+  //tipos que le hacen doble de daño a al menos la mitad del equipo
   List<String> getDebilitatingWeaknesses() {
     Map<String, int> weak = {
       'grass': 0,
@@ -962,6 +967,7 @@ class _TeamStatsState extends State<TeamStats> {
     return common;
   }
 
+  //inmunidades compartidas por al menos la mitad del equipo
   List<String> getParcialInmunity() {
     Map<String, int> weak = {
       'grass': 0,
@@ -1009,6 +1015,7 @@ class _TeamStatsState extends State<TeamStats> {
     return common;
   }
 
+  //tipos a los que al menos la mitad del equipo hace doble de daño
   List<String> getStrongerAttacks() {
     Map<String, int> atk = {
       'grass': 0,

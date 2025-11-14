@@ -5,12 +5,14 @@ import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/screens/team_screens/team_manager.dart';
 import 'package:pokedex/data/pokeapi.dart';
 
+//clase equipos, equipos pueden tener hasta 6 pokémon, que se pueden eliminar.
+// cada equipo tiene nombre único y se le puede agregar notas
 class Team {
-  String title;
-  final Set<String> deck;
-  final List<Pokemon> pokemons;
-  final Map<String, dynamic> details;
-  String notes;
+  String title; //nombre del equipo
+  final Set<String> deck; //nombres de pokemon en el equipo
+  final List<Pokemon> pokemons; //pokemon en el equipo
+  final Map<String, dynamic> details; //detalles de los pokemon del equipo
+  String notes; //notas del equipo
 
   Team({
     required this.title,
@@ -24,7 +26,7 @@ class Team {
 
   bool isTeamedUp(String poke) {
     return deck.contains(poke);
-  }
+  } //retorna true si pokemon es parte del equipo
 
   void add(String poke, BuildContext context, {VoidCallback? onUpdated}) {
     if (deck.length < 6) {
@@ -36,12 +38,12 @@ class Team {
     } else {
       _showMyDialog(context);
     }
-  }
+  } //añade pokemon al equipo, y si equipo está lleno avisa
 
   void remove(String poke) {
     deck.remove(poke);
     pokemons.remove(_fetchFromList(poke)!);
-  }
+  } //saca a pokemon del equipo
 
   Pokemon? _fetchFromList(String name) {
     for (Pokemon poke in pokemons) {
@@ -50,7 +52,7 @@ class Team {
       }
     }
     return null;
-  }
+  } //retorna pokemon de la lista por su nombre
 
   void fetchPokemon(String name, {VoidCallback? onUpdated}) async {
     Pokemon? poke = await PokeApi.fetchPokemonByName(name);
@@ -63,15 +65,15 @@ class Team {
       });
       if (onUpdated != null) onUpdated(); // notificamos provider
     }
-  }
+  } //crea pokemon a partir de su nomre
 
   void renameTeam(String name) {
     title = name;
-  }
+  } //cambia nombre del equipo
 
   void editNotes(String notas) {
     notes = notas;
-  }
+  } //se editan las notas
 
   void _showMyDialog(BuildContext context) {
     showDialog(
@@ -103,7 +105,7 @@ class Team {
         );
       },
     );
-  }
+  } //dialog que avisa si un equipo está lleno y redirige a manejador de equipos si el usuario lo desea
 
   Future<Map<String, dynamic>?> _fetchDetails(Pokemon pokemon) async {
     // Función para fetch todos los datos.
@@ -132,9 +134,9 @@ class Team {
       'details': details,
       'notes': notes,
     };
-  }
+  } //transforma equipo a map para guardarlo en memoria
 
-  //construye el pokemon a partir de la base de datos
+  //recontruye equipo desde un map (al recuperarlo de la memoria)
   factory Team.fromMap(Map<String, dynamic> map) {
     List<Map<String, dynamic>> poke = List<Map<String, dynamic>>.from(
       jsonDecode(map['pokemons']),

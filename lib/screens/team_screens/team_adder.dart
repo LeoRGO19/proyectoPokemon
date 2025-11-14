@@ -19,7 +19,7 @@ import 'package:pokedex/data/teamWatcher.dart';
 import 'package:pokedex/components/team_components/team.dart';
 
 class AdderPokemonScreen extends StatefulWidget {
-  final String title;
+  final String title; //titulo del equipo
   const AdderPokemonScreen({super.key, required this.title});
 
   @override
@@ -62,8 +62,8 @@ class _AdderPokemonScreenState extends State<AdderPokemonScreen>
   // Actualizado: Límite a Pokémon base completos (evita formas con datos incompletos)
   static const int _maxPokedexId = 1025; // Límite max ID.
 
-  late final Team team;
-  late final TeamsProvider teams;
+  late final Team team; //equipo al qie le agregaremos pokemon
+  late final TeamsProvider teams; //proveedor de equipos
 
   void _handlePokemonSelect(Pokemon pokemon) {
     setState(() {
@@ -454,13 +454,14 @@ class _AdderPokemonScreenState extends State<AdderPokemonScreen>
             ),
             onPressed: () {
               for (Pokemon pokemon in _seleccionPoke) {
-                teams.addPokemon(team, pokemon.name, context);
+                teams.addPokemon(
+                  team,
+                  pokemon.name,
+                  context,
+                ); //agrega los pokemon a equipo
               }
               teams.notify();
               Navigator.of(context).pop();
-              /*for (Pokemon pokemon in _seleccionPoke) {
-                teams.addPokemon(team, pokemon.name, context);
-              }*/
             },
           ),
           SizedBox(width: 40),
@@ -530,7 +531,9 @@ class _AdderPokemonScreenState extends State<AdderPokemonScreen>
                                     // Clickable.
                                     onTap: () {
                                       setState(() {
-                                        _seleccionPoke.remove(pokemon);
+                                        _seleccionPoke.remove(
+                                          pokemon,
+                                        ); //al apretarlo se saca pokemon de lista de pokemon que vamos a agregar
                                       });
                                     },
                                     child: Column(
