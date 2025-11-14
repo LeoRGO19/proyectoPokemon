@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pokedex/components/team_components/team.dart';
@@ -6,11 +8,43 @@ import 'package:pokedex/components/team_components/team.dart';
 permitiendo que todas las iteraciones de este reflejen los cambios (como es en el caso de pokémon creados por la cadena evolutiva, 
 que son diferentes a los pokémon de la lista principal de la pokédex)*/
 class TeamsProvider extends ChangeNotifier {
-  final List<Team> _teams = [
-    Team(title: 'Prueba 1'),
-    Team(title: 'Prueba 2'),
-    Team(title: 'Prueba 3'),
-  ];
+  final List<Team> _teams = [];
+
+  TeamsProvider() {
+    _loadTeams();
+  }
+
+  ///carga la lista de favoritos desde SharedPreferences
+  Future<void> _loadTeams() async {
+    final prefs = await SharedPreferences.getInstance();
+    //prefs.clear();
+    final List<String>? storedList = prefs.getStringList("teams");
+    if (storedList != null) {
+      _teams.addAll(toTeam(storedList));
+      notifyListeners();
+    }
+  }
+
+  //guarda los favoritos en shared preferences
+  Future<void> _saveTeams() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList("teams", toIterable(_teams));
+  }
+
+  List<Team> toTeam(List<String> saved) {
+    List<Team> equipos = [];
+
+    for (String teamString in saved) {
+      Map<String, dynamic> data = jsonDecode(teamString);
+      equipos.add(Team.fromMap(data));
+    }
+
+    return equipos;
+  }
+
+  List<String> toIterable(List<Team> equipos) {
+    return equipos.map((team) => jsonEncode(team.toMap())).toList();
+  }
 
   void notify() {
     notifyListeners();
@@ -30,34 +64,39 @@ class TeamsProvider extends ChangeNotifier {
     return null;
   }
 
-  void addPokemon(Team team, String name, BuildContext context) {
+  void addPokemon(Team team, String name, BuildContext context) async {
     team.add(name, context, onUpdated: notifyListeners);
     notifyListeners();
+    await _saveTeams();
   }
 
-  void removePokemon(Team team, String name) {
+  void removePokemon(Team team, String name) async {
     if (team.isTeamedUp(name)) {
       team.remove(name);
       notifyListeners();
+      await _saveTeams();
     }
   }
 
-  void addTeam(String equipo) {
+  void addTeam(String equipo) async {
     _teams.add(Team(title: equipo));
     notifyListeners();
+    await _saveTeams();
   }
 
-  void removeTeam(Team team) {
+  void removeTeam(Team team) async {
     _teams.remove(team);
     notifyListeners();
+    await _saveTeams();
   }
 
-  void renamingTeam(Team team, String name) {
+  void renamingTeam(Team team, String name) async {
     team.renameTeam(name);
     notifyListeners();
+    await _saveTeams();
   }
 
-  void editNotes(BuildContext context, Team team) {
+  void editNotes(BuildContext context, Team team) async {
     String initial = team.notes;
     final controller = TextEditingController(text: initial);
     showDialog(
@@ -88,7 +127,7 @@ class TeamsProvider extends ChangeNotifier {
                   child: const Text("Cancelar"),
                 ),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     final text = controller.text.trim();
 
                     if (text.isEmpty) {
@@ -97,6 +136,7 @@ class TeamsProvider extends ChangeNotifier {
                     }
                     team.editNotes(text);
                     notifyListeners();
+                    await _saveTeams();
                     Navigator.pop(context);
                   },
                   child: const Text("Guardar"),
@@ -114,7 +154,7 @@ class TeamsProvider extends ChangeNotifier {
     bool creating,
     String? title,
     Team? team,
-  ) {
+  ) async {
     final _formKey = GlobalKey<FormState>();
     showDialog(
       context: context,
@@ -131,7 +171,7 @@ class TeamsProvider extends ChangeNotifier {
                 labelText: 'Nombre del equipo *',
                 contentPadding: EdgeInsets.fromLTRB(16, 0, 16, 0),
               ),
-              onSaved: (String? value) {
+              onSaved: (String? value) async {
                 if (value != null) {
                   if (creating) {
                     addTeam(value);
@@ -139,6 +179,7 @@ class TeamsProvider extends ChangeNotifier {
                   } else {
                     renamingTeam(team!, value);
                   }
+                  await _saveTeams();
                 }
               },
               validator: (String? value) {
@@ -177,15 +218,4 @@ class TeamsProvider extends ChangeNotifier {
       },
     );
   }
-
-  /* void toggleFavorite(Team teamie, String name) async {
-    //agrega o saca pokémon de la lista, dependiendo de su estado anterior
-    if (teamie.isTeamedUp(name)) {
-      teamie.remove(name);
-    } else {
-      teamie.add(name); //guardamos
-    }
-    notifyListeners(); // notifica a todos los listeners (principalmente BotonFavorito)
-    //await _saveFavorites();
-  }*/
 }

@@ -520,7 +520,7 @@ class _TeamStatsState extends State<TeamStats> {
                                         stats(),
                                         SizedBox(
                                           height: availableHeight * 0.60,
-                                          width: 100,
+                                          width: 150,
                                           child: Text(''),
                                         ),
                                       ],

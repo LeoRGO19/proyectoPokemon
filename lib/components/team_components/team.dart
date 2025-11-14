@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:pokedex/screens/team_screens/team_manager.dart';
@@ -5,12 +7,20 @@ import 'package:pokedex/data/pokeapi.dart';
 
 class Team {
   String title;
-  final Set<String> deck = {};
-  final List<Pokemon> pokemons = [];
-  final Map<String, dynamic> details = {};
-  String notes = '';
+  final Set<String> deck;
+  final List<Pokemon> pokemons;
+  final Map<String, dynamic> details;
+  String notes;
 
-  Team({required this.title});
+  Team({
+    required this.title,
+    Set<String>? deck,
+    List<Pokemon>? pokemons,
+    Map<String, dynamic>? details,
+    this.notes = '',
+  }) : deck = deck ?? <String>{},
+       pokemons = pokemons ?? <Pokemon>[],
+       details = details ?? <String, dynamic>{};
 
   bool isTeamedUp(String poke) {
     return deck.contains(poke);
@@ -108,5 +118,37 @@ class Team {
       print(e);
     }
     return null;
+  }
+
+  Map<String, dynamic> toMap() {
+    List<Map<String, dynamic>> poke = [];
+    for (Pokemon p in pokemons) {
+      poke.add(p.toMap());
+    }
+    return {
+      'title': title,
+      'deck': jsonEncode(deck.toList()),
+      'pokemons': jsonEncode(poke),
+      'details': details,
+      'notes': notes,
+    };
+  }
+
+  //construye el pokemon a partir de la base de datos
+  factory Team.fromMap(Map<String, dynamic> map) {
+    List<Map<String, dynamic>> poke = List<Map<String, dynamic>>.from(
+      jsonDecode(map['pokemons']),
+    );
+    List<Pokemon> pokemones = [];
+    for (Map<String, dynamic> p in poke) {
+      pokemones.add(Pokemon.fromMap(p));
+    }
+    return Team(
+      title: map['title'],
+      deck: Set<String>.from(jsonDecode(map['deck'])),
+      pokemons: pokemones,
+      details: Map<String, dynamic>.from(map['details']),
+      notes: map['notes'],
+    );
   }
 }
