@@ -31,6 +31,7 @@ class _TeamStatsState extends State<TeamStats> {
   List<String> _weaknesses = []; // Debilidades basadas en tipos.
   List<String> _types = []; // Tipos.
   List<String> _major = [];
+  List<String> _inmunity = [];
   bool _isLoading = true; // Flag de carga.
   String _error = ''; // Mensaje de error.
   //mapa con traducciones de tipo para utilizar al mostrarlas en la descripción del pokémon
@@ -227,6 +228,8 @@ class _TeamStatsState extends State<TeamStats> {
         _weaknesses = getWeak; // Debilidades en comun
         _types = getTypesInCommon(); //tipos en comun
         _major = getDebilitatingWeaknesses(); //debilidades fuertes
+        _inmunity =
+            getParcialInmunity(); //inmunidades compartidas por más de la mitad del equipo
         _isLoading = false; // Fin de carga.
       });
     }
@@ -556,6 +559,20 @@ class _TeamStatsState extends State<TeamStats> {
                         : 'No hay debilidades importantes (ataque x2) compartidos por al menos la mitad del equipo',
                     backgroundColor: AppColors.primary,
                   ),
+                  CharacteristicWidget(
+                    title: 'Inmunidades importantes:',
+                    value: _inmunity.isNotEmpty
+                        ? _inmunity
+                              .map(
+                                (t) =>
+                                    traduccionesTipo[t.toLowerCase()] ??
+                                    t, //traduce los tipos
+                              )
+                              .join(', ')
+                              .toUpperCase()
+                        : 'No hay inmunidades compartidos por al menos la mitad del equipo',
+                    backgroundColor: AppColors.primary,
+                  ),
                 ],
               ),
             ),
@@ -742,6 +759,53 @@ class _TeamStatsState extends State<TeamStats> {
         Map<String, double> sub = matrix_of_weakness[tipo]!;
         sub.forEach((key, value) {
           if (value == 2) {
+            setState(() {
+              weak.update(key, (value) => value + 1);
+            });
+          }
+        });
+      }
+    }
+    weak.forEach((key, value) {
+      if (value >= min) {
+        common.add(key);
+      }
+    });
+    return common;
+  }
+
+  List<String> getParcialInmunity() {
+    Map<String, int> weak = {
+      'grass': 0,
+      'fire': 0,
+      'water': 0,
+      'electric': 0,
+      'ice': 0,
+      'fighting': 0,
+      'poison': 0,
+      'ground': 0,
+      'flying': 0,
+      'psychic': 0,
+      'bug': 0,
+      'rock': 0,
+      'ghost': 0,
+      'dragon': 0,
+      'dark': 0,
+      'steel': 0,
+      'fairy': 0,
+      'normal': 0,
+    };
+    final List<String> common = [];
+    pokemons = widget.team.pokemons;
+    int min = (pokemons.length == 2)
+        ? 2
+        : (pokemons.length ~/ 2 + pokemons.length % 2);
+    for (Pokemon poke in pokemons) {
+      final type = poke.types;
+      for (String tipo in type) {
+        Map<String, double> sub = matrix_of_weakness[tipo]!;
+        sub.forEach((key, value) {
+          if (value == 0) {
             setState(() {
               weak.update(key, (value) => value + 1);
             });
