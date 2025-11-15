@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex/components/team_components/add.dart';
 import 'package:pokedex/data/exception_handler.dart';
 import 'package:pokedex/data/pokeapi.dart';
 import 'package:pokedex/data/pokemon.dart';
@@ -250,24 +251,41 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                       height: titleHeight, // Altura calculada.
                       width: double.infinity, // Ancho full.
                       color: AppColors.fontoTituloDetalle, // Negro.
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        // Centra texto.
+                      child: Stack(
                         children: [
-                          Text(
-                            // Texto ID y nombre.
-                            '#${_details['id']} ${widget.pokemon.name.toUpperCase()}',
-                            style: TextStyles.bodyText.copyWith(
-                              // Estilo con color blanco y size 24.
-                              color: Colors.white,
-                              fontSize: 24,
+                          Align(
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              // Centra texto.
+                              children: [
+                                Text(
+                                  // Texto ID y nombre.
+                                  '#${_details['id']} ${widget.pokemon.name.toUpperCase()}',
+                                  style: TextStyles.bodyText.copyWith(
+                                    // Estilo con color blanco y size 24.
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                  ),
+                                ),
+                                //se agrega  botón para marcar como favorito
+                                SizedBox(
+                                  width: titleHeight,
+                                  height: titleHeight,
+                                  child: BotonFavorito(pokemon: widget.pokemon),
+                                ),
+                              ],
                             ),
                           ),
-                          //se agrega  botón para marcar como favorito
-                          SizedBox(
-                            width: titleHeight,
-                            height: titleHeight,
-                            child: BotonFavorito(pokemon: widget.pokemon),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: SizedBox(
+                              width: titleHeight,
+                              height: titleHeight,
+                              child: BotonEquipo(
+                                pokemon: widget.pokemon,
+                              ), //boton para añadir pokemon a equipo
+                            ),
                           ),
                         ],
                       ),
@@ -612,7 +630,11 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
               style: TextStyles.bodyText, // Estilo.
             ),
           ),
-          StatsChartWidget(stats: _details['stats']), // Widget extraído.
+          StatsChartWidget(
+            stats: _details['stats'],
+            isTeam:
+                false, //no es team, así que stats sabe que le están dando un map
+          ), // Widget extraído.
         ],
       ),
     );

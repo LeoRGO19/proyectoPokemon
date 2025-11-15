@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/screens/imc_pokedex_screen.dart';
+import 'package:pokedex/screens/team_screens/team_manager.dart';
 import 'package:pokedex/screens/selector_pokemon_screen.dart';
 
 class MenuPrincipal extends StatefulWidget {
@@ -50,6 +51,19 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
                   );
                 },
                 child: Text("PokeComparador", style: TextStyles.menuText),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TeamManager()),
+                  );
+                },
+                child: Text(
+                  "Organizador de equipos",
+                  style: TextStyles.menuText,
+                ),
               ),
 
               // Espacio para agregar más botones o widgets más adelante
