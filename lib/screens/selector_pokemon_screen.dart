@@ -11,6 +11,7 @@ import 'package:pokedex/data/pokeapi.dart';
 import 'dart:isolate';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/data/favoriteWatcher.dart';
+import 'package:pokedex/screens/menu_principal.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/services/database_services.dart';
 import 'dart:io';
@@ -439,7 +440,7 @@ class _SelectorPokemonScreenState extends State<SelectorPokemonScreen>
             label: Text(
               _seleccionPoke.length == 2
                   ? 'A PokeComparar!'
-                  : 'Faltan/Sobran Pokémon',
+                  : 'Faltan Pokémon por seleccionar',
               style: TextStyles.bodyText,
             ),
             onPressed: () {
@@ -456,7 +457,21 @@ class _SelectorPokemonScreenState extends State<SelectorPokemonScreen>
               );
             },
           ),
-          SizedBox(width: 40),
+          IconButton(
+            // Botón home.
+            icon: const Icon(Icons.home), // Icono.
+            onPressed: () {
+              // Acción.
+              Navigator.pushAndRemoveUntil(
+                // Navega a menu y remueve stack.
+                context,
+                MaterialPageRoute(builder: (context) => MenuPrincipal()),
+                (Route<dynamic> route) => false,
+              );
+            },
+            tooltip: 'Volver a Menú Principal', // Tooltip.
+          ),
+          SizedBox(width: 50),
         ],
       ),
       body: Container(
