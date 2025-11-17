@@ -260,7 +260,7 @@ class _ResultadoCompararState extends State<ResultadoComparar>
         child: Image.network(
           'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id1.png',
           width: MediaQuery.of(context).size.width * 0.4,
-          height: -5000,
+          height: 400,
           errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
         ),
       );
