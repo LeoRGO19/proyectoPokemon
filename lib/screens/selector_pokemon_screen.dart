@@ -321,6 +321,31 @@ class _SelectorPokemonScreenState extends State<SelectorPokemonScreen>
     }
   }
 
+  bool isTypeCategory(String cat) {
+    // Lista de tipos válidos
+    const validTypes = [
+      'normal',
+      'fire',
+      'water',
+      'electric',
+      'grass',
+      'ice',
+      'fighting',
+      'poison',
+      'ground',
+      'flying',
+      'psychic',
+      'bug',
+      'rock',
+      'ghost',
+      'dragon',
+      'dark',
+      'steel',
+      'fairy',
+    ];
+    return validTypes.contains(cat.toLowerCase());
+  }
+
   Future<void> _applyFilters() async {
     List<Pokemon> results = List.from(_allPokemons); // Copia all.
     final favoritesProvider = context
@@ -341,10 +366,11 @@ class _SelectorPokemonScreenState extends State<SelectorPokemonScreen>
           bool matches = false; // Match actual.
           if (pokemon.generation.toLowerCase() == cat.toLowerCase()) {
             matches = true;
-          } else if (pokemon.types
-              .map((t) => t.toLowerCase())
-              .contains(cat.toLowerCase())) {
-            matches = true;
+          } else if (isTypeCategory(cat)) {
+            //chequea que sea tipo
+            matches = pokemon.types
+                .map((t) => t.toLowerCase())
+                .contains(cat.toLowerCase());
           } else if (cat.toLowerCase() == 'legendary' && pokemon.isLegendary) {
             matches = true;
           } else if (cat.toLowerCase() == 'mythical' && pokemon.isMythical) {
@@ -363,18 +389,19 @@ class _SelectorPokemonScreenState extends State<SelectorPokemonScreen>
           )) {
             matches = true;
           }
+
           if (_filterMode == 'AND') {
-            matchesAll = matchesAll && matches; // Si todos coindicen
-          } else if (matches) {
-            matchesCount++;
+            matchesAll = matchesAll && matches;
+          } else {
+            if (matches) matchesCount++;
           }
         }
+
         return _filterMode == 'AND'
             ? matchesAll
             : matchesCount > 0; // Retorna basado en modo.
       }).toList(); // Lista filtrada.
     }
-
     if (_searchQuery.isNotEmpty) {
       // Si hay texto
       results = results.where((pokemon) {
