@@ -8,10 +8,10 @@ Durante este sprint se logró implementar dos funcionalidades clave que fortalec
 
 # **Retrospectiva**
 ## Problemas:
-Este sprint en general se desarrolló eficientemente, y se cumplieron los objetivos sin contratiempos relevantes. 
+Este sprint en general se desarrolló eficientemente, y se cumplieron los objetivos sin contratiempos relevantes. Sin embargo, a veces las metas no fueron del todo fijas, y se movían sin consecuencias, lo que a pesar de no tener muchas consecuencias negativas, no es ideal.
 
 ## Aspectos Destacados
-Este sprint se desarrolló de manera fluida, la planificación y ejecución de las tareas se mantuvo dentro de los tiempos estimados. Además la comunicación entre los integrantes del equipo fue constante y efectiva. 
+Este sprint se desarrolló de manera fluida, la planificación y ejecución de las tareas se mantuvo dentro de los tiempos estimados. Además la comunicación entre los integrantes del equipo fue constante y efectiva. También podemos destacar que a pesar de no ocupar el potencial total de un sistema de milestones, ocuparlo si mejoró nuestro manejo del tiempo y nos ayudó a cumplir plazos de mejor manera.
 
 ## Mejoras
 A pesar de que el sistema de milestones funcionó bien a nivel personal, quizás una mejora que lo llevaría a otro nivel sería compartirlas de forma pública, para que de esa manera entre los miembros del equipo se hagan responsables los unos a otros de cumplir con plazos, ya que, al mantener estas metas en su mayoría privadas, se pueden aplazar ligeramente, lo que rompe con el propósito inicial de tener metas en un primer lugar. Aunque estos ligeros movimientos de plazos no rompieron con el flujo general de desarrollo de código, si podrían mejorarse para tener aún más holgura en términos de tiempo al final del sprint.
