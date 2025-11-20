@@ -2,20 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/core/app_colors.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/data/pokemon.dart';
+
 import 'package:pokedex/screens/comparador_pokemon.dart';
 import 'dart:math';
 import 'package:pokedex/components/pokedex_components/search_bar_widget.dart';
 import 'package:pokedex/components/pokedex_components/category_filter_widget.dart';
 import 'package:pokedex/components/pokedex_components/pokemon_card_list.dart';
 import 'package:pokedex/data/pokeapi.dart';
-import 'dart:isolate';
-import 'package:http/http.dart' as http;
+
 import 'package:pokedex/data/favoriteWatcher.dart';
 import 'package:pokedex/screens/menu_principal.dart';
 import 'package:provider/provider.dart';
 import 'package:pokedex/services/database_services.dart';
-import 'dart:io';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:pokedex/core/pokemon_list_controller.dart';
 
 class SelectorPokemonScreen extends StatefulWidget {
   const SelectorPokemonScreen({super.key});
@@ -25,42 +24,88 @@ class SelectorPokemonScreen extends StatefulWidget {
 }
 
 class _SelectorPokemonScreenState extends State<SelectorPokemonScreen>
-    with SingleTickerProviderStateMixin {
+    with
+        SingleTickerProviderStateMixin,
+        PokemonListController<SelectorPokemonScreen> {
   final Set<Pokemon> _seleccionPoke = {};
+  // Se mantienen como `late` ya que se inicializan justo antes de la navegación.
   late Pokemon pokeElegido1;
   late Pokemon pokeElegido2;
 
-  final ScrollController _scrollController =
-      ScrollController(); // Controller para infinite scroll.
-  final List<Pokemon> _allPokemons = []; // Lista total loaded.
-  final List<Pokemon> _filteredPokemons = []; // Lista filtrada mostrada.
-  bool _isLoading = false; // Flag carga.
-  bool _hasMore = true; // Flag más por cargar.
-  int _offset = 0; // Offset para API.
-  final int _limit = 100; // Batch size.
+  final ScrollController _scrollController = ScrollController();
+  // CORRECCIÓN: Se asegura que son `List<Pokemon>` mutables.
+  List<Pokemon> _allPokemons = [];
+  List<Pokemon> _filteredPokemons = [];
+  bool _isLoading = true;
+  bool _hasMore = false;
 
-  String _searchQuery = ''; // Query búsqueda.
-  Set<String> _selectedCategories = {}; // Categorías seleccionadas.
-  String _filterMode = 'OR'; // Modo filtro.
+  // Variables de filtrado
+  String _searchQuery = '';
+  Set<String> _selectedCategories = {};
+  String _filterMode = 'OR';
 
-  int? _targetSearchId; // ID target para búsqueda específica.
-  bool _specificSearch = false; // Flag búsqueda exacta.
+  @override
+  void initState() {
+    super.initState();
+    fetchPokemons(context);
+    scrollController.addListener(_scrollListener);
+  }
 
-  final Map<String, int> _generationMaxIds = {
-    // Max ID por generación.
-    'generation-i': 151,
-    'generation-ii': 251,
-    'generation-iii': 386,
-    'generation-iv': 493,
-    'generation-v': 649,
-    'generation-vi': 721,
-    'generation-vii': 809,
-    'generation-viii': 905,
-    'generation-ix': 1010,
-  };
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
-  // Actualizado: Límite a Pokémon base completos (evita formas con datos incompletos)
-  static const int _maxPokedexId = 1025; // Límite max ID.
+  void _scrollListener() {
+    // La lista está cargada completamente, no hay fetch incremental.
+  }
+
+  void _resetState() {
+    setState(() {
+      allPokemons.clear();
+      filteredPokemons.clear();
+      searchQuery = '';
+      selectedCategories.clear();
+      filterMode = 'OR';
+      isLoading = true;
+      hasMore = false;
+    });
+  }
+
+  // =====================================================================
+  // LÓGICA DE CARGA: Desde la Base de Datos (Adaptación de ImcPokedexScreen)
+  // =====================================================================
+
+  Future<void> _fetchPokemons() async {
+    // Usar fetchPokemons(context) del mixin
+    await fetchPokemons(context);
+  }
+
+  // =====================================================================
+  // LÓGICA DE FILTRADO (Corregida y Separada)
+  // =====================================================================
+
+  // CORRECCIÓN: Esta función debe estar FUERA de _applyFilters.
+  bool isTypeCategory(String cat) {
+    return super.isTypeCategory(cat);
+  }
+
+  Future<void> _applyFilters() async {
+    await applyFilters(context);
+  }
+
+  Future<void> _filterBySearch(String query) async {
+    await filterBySearch(query, context);
+  }
+
+  Future<void> _onCategoriesChanged(Set<String> selected, String mode) async {
+    await onCategoriesChanged(selected, mode, context);
+  }
+
+  // =====================================================================
+  // LÓGICA DE SELECCIÓN (Intacta)
+  // =====================================================================
 
   void _handlePokemonSelect(Pokemon pokemon) {
     setState(() {
@@ -78,373 +123,9 @@ class _SelectorPokemonScreenState extends State<SelectorPokemonScreen>
     return _seleccionPoke.contains(pokemon);
   }
 
-  @override
-  void initState() {
-    // Inicializa.
-    super.initState();
-    _resetState(); // Resetea variables.
-    _fetchPokemons(); // Inicia carga.
-    _scrollController.addListener(() {
-      // Listener scroll.
-      if (_scrollController.position.pixels >= // Si cerca del final.
-              _scrollController.position.maxScrollExtent - 200 &&
-          !_isLoading &&
-          _hasMore) {
-        _fetchPokemons(); // Carga más.
-      }
-    });
-  }
-
-  void _resetState() {
-    // Función para reset variables.
-    _allPokemons.clear(); // Limpia all.
-    _filteredPokemons.clear(); // Limpia filtered.
-    _offset = 0; // Reset offset.
-    _hasMore = true; // Hay más.
-    _searchQuery = ''; // Limpia query.
-    _selectedCategories.clear(); // Limpia categorías.
-    _filterMode = 'OR'; // Default modo.
-    _specificSearch = false; // No específica.
-    _targetSearchId = null; // No target.
-  }
-
-  Future<void> _fetchPokemons({int? targetId}) async {
-    final db = DatabaseService.instance;
-    if (Platform.isWindows || Platform.isLinux) {
-      //crea base de datos correctamente
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
-    }
-    final int dataSaved = await db
-        .checkData(); //si es que los pokemon estan en la base de datos los carga desde ahí y no desde la PokeApi
-    if (dataSaved == 1025 && _offset == 0) {
-      debugPrint('Todos los pokémon están en la base de datos, subiendo...');
-      final saved = await db.getPokemon();
-      setState(() {
-        _allPokemons.clear(); //me aseguro de no subir dos veces
-        _allPokemons.addAll(saved);
-        _isLoading = false;
-        _hasMore = false;
-      });
-      _filteredPokemons.clear();
-      await _applyFilters();
-      return;
-    }
-    // Función para fetch batch.
-    if (_isLoading) return; // Si ya está cargando, sale.
-    setState(
-      () => _isLoading = true,
-    ); // Loading true dado que vamos a hacer fetch
-    try {
-      if (dataSaved != 0) {
-        //si hay datos en la base de datos los carga
-        final saved = await db.getPokemon();
-        _allPokemons.clear(); //por si hay duplicates
-        _allPokemons.addAll(saved);
-        _applyFilters(); //para verlos
-      }
-      _offset = dataSaved; //comienza desde el ultimo pokemon guardado
-      int targetOffset = targetId ?? _maxPokedexId; // Target o max.
-      // Limitar a 1025 para evitar IDs altos con datos incompletos
-      targetOffset = min(targetOffset, _maxPokedexId); // Min.
-      List<Pokemon> newPokemons = []; // Nuevos loaded.
-      while (_hasMore && _offset < targetOffset) {
-        // Mientras más y offset < target.
-        int loadLimit = min(_limit, targetOffset - _offset); // Limite batch.
-
-        final receivePort = ReceivePort();
-        try {
-          await Isolate.spawn(_fetchPokemonsIsolate, {
-            'sendPort': receivePort.sendPort,
-            'limit': loadLimit,
-            'offset': _offset,
-          });
-
-          final isolateResult = await receivePort.first; // Espera resultado.
-          if (isolateResult is List<Pokemon>) {
-            // Si lista.
-            newPokemons.addAll(isolateResult); // Agrega.
-            setState(() {
-              // Actualiza.
-              _offset += loadLimit; // Avanza offset.
-              if (isolateResult.isEmpty || _offset >= _maxPokedexId) {
-                // Si vacío o max.
-                _hasMore = false;
-              }
-              db.addPokemon(isolateResult);
-              _allPokemons.addAll(isolateResult); // Agrega a all.
-              _applyFilters(); //permite que pokémon se vean
-              for (var pokemon in isolateResult) {
-                // Print debug.
-                debugPrint(
-                  'Pokémon: ${pokemon.name}, Generación: ${pokemon.generation}',
-                );
-              }
-            });
-          } else if (isolateResult is String) {
-            // Si error string.
-            debugPrint('Error desde Isolate: $isolateResult');
-          }
-        } finally {
-          receivePort.close(); // Cierra port.
-        }
-      }
-      // Aplicar filtros después de todos los lotes
-      if (newPokemons.isNotEmpty) {
-        // Si nuevos.
-        await _applyFilters();
-      }
-    } catch (e) {
-      debugPrint('Error cargando Pokémon: $e');
-    } finally {
-      setState(() => _isLoading = false); // Fin loading.
-    }
-  }
-
-  static void _fetchPokemonsIsolate(Map<String, dynamic> args) async {
-    // Función Isolate.
-    final SendPort sendPort = args['sendPort']; // Port.
-    final int limit = args['limit']; // Limite.
-    final int offset = args['offset']; // Offset.
-
-    await PokeApi.fetchAllPokemonInIsolate(
-      // Llama API en Isolate.
-      limit: limit,
-      offset: offset,
-      sendPort: sendPort,
-    );
-  }
-
-  int? _calculateTargetId(Set<String> categories) {
-    // Calcula target ID basado en categorías.
-    int maxGenId = 0; // Max gen ID.
-    bool hasNonGenFilter = false; // Flag non-gen.
-
-    for (var cat in categories) {
-      // Por cada cat.
-      if (_generationMaxIds.containsKey(cat)) {
-        // Si gen.
-        maxGenId = max(maxGenId, _generationMaxIds[cat]!); // Max.
-      } else {
-        hasNonGenFilter = true; // Non-gen.
-      }
-    }
-
-    if (hasNonGenFilter) {
-      // Si non-gen.
-      return _maxPokedexId; // Full.
-    } else if (maxGenId > 0) {
-      // Si gen max.
-      return min(maxGenId, _maxPokedexId); // Min con max.
-    }
-    return null; // Ninguno.
-  }
-
-  Future<void> _filterBySearch(String query) async {
-    setState(() {
-      _searchQuery = query.toLowerCase().trim();
-      _filteredPokemons.clear();
-    });
-
-    _specificSearch = false;
-    _targetSearchId = null;
-    bool needsFetch = false;
-    int? targetId;
-
-    if (_searchQuery.isNotEmpty) {
-      try {
-        Pokemon? basicPokemon;
-        if (int.tryParse(_searchQuery) != null) {
-          int id = int.parse(_searchQuery);
-          if (id > _maxPokedexId) {
-            //removido: setState(() { // Limpia._filteredPokemons.clear();});return;.
-          } else {
-            basicPokemon = await PokeApi.fetchPokemonById(
-              id,
-            ); // Fetch exacto por ID.
-          }
-        } else {
-          basicPokemon = await PokeApi.fetchPokemonByName(
-            _searchQuery,
-          ); // Fetch exacto por nombre.
-        }
-
-        if (basicPokemon != null) {
-          // Si éxito en exacto (ID o nombre full).
-          _specificSearch = true;
-          final pokemon = await PokeApi.fetchPokemonDetails(
-            basicPokemon,
-            http.Client(),
-          );
-          targetId = int.parse(pokemon.url.split('/')[6]) + 1;
-          _targetSearchId = min(targetId, _maxPokedexId + 1);
-          if (_offset < targetId) {
-            needsFetch = true;
-          }
-        }
-        // REMOVIDO: No hay 'else { clear() return }'; siempre continúa a _applyFilters.
-      } catch (e) {
-        debugPrint('Error buscando Pokémon exacto: $e');
-        // REMOVIDO: No clear ni return; permite filtrado local.
-      }
-    }
-
-    if (needsFetch && targetId != null) {
-      await _fetchPokemons(
-        targetId: targetId,
-      ); // Solo fetch extra si exacto éxito.
-    } else {
-      await _applyFilters(); // SIEMPRE aplica filtro local (parciales, vacíos, o combinado).
-    }
-  }
-
-  Future<void> _onCategoriesChanged(Set<String> selected, String mode) async {
-    // Función para cambio categorías.
-    //if (_isLoading) return;
-    setState(() {
-      _selectedCategories = selected;
-      _filterMode = mode;
-      _filteredPokemons.clear();
-      debugPrint(
-        'Filtros seleccionados: $_selectedCategories, Modo: $_filterMode',
-      );
-    });
-
-    final targetId = _calculateTargetId(selected); // Calcula target.
-    bool needsFetch = targetId != null && _offset < targetId; // Necesita?
-
-    if (needsFetch && !_isLoading) {
-      await _fetchPokemons(targetId: targetId);
-    } else {
-      //si no ha terminado de cargar no nos preocupamos con fetch y mostramos lo que tenemos
-      await _applyFilters();
-    }
-  }
-
-  bool isTypeCategory(String cat) {
-    // Lista de tipos válidos
-    const validTypes = [
-      'normal',
-      'fire',
-      'water',
-      'electric',
-      'grass',
-      'ice',
-      'fighting',
-      'poison',
-      'ground',
-      'flying',
-      'psychic',
-      'bug',
-      'rock',
-      'ghost',
-      'dragon',
-      'dark',
-      'steel',
-      'fairy',
-    ];
-    return validTypes.contains(cat.toLowerCase());
-  }
-
-  Future<void> _applyFilters() async {
-    List<Pokemon> results = List.from(_allPokemons); // Copia all.
-    final favoritesProvider = context
-        .read<
-          FavoritesProvider
-        >(); //servirá para revisar si pokémon es favorito
-    bool hasFilters =
-        _selectedCategories.isNotEmpty ||
-        _searchQuery.isNotEmpty; // Hay filtros?
-
-    if (_selectedCategories.isNotEmpty) {
-      // Si hay categorías seleccionadas.
-      results = results.where((pokemon) {
-        bool matchesAll = true; // Para AND.
-        int matchesCount = 0; // Para OR.
-        for (var cat in _selectedCategories) {
-          // Por cat.
-          bool matches = false; // Match actual.
-          if (pokemon.generation.toLowerCase() == cat.toLowerCase()) {
-            matches = true;
-          } else if (isTypeCategory(cat)) {
-            //chequea que sea tipo
-            matches = pokemon.types
-                .map((t) => t.toLowerCase())
-                .contains(cat.toLowerCase());
-          } else if (cat.toLowerCase() == 'legendary' && pokemon.isLegendary) {
-            matches = true;
-          } else if (cat.toLowerCase() == 'mythical' && pokemon.isMythical) {
-            matches = true;
-          } else if (cat.toLowerCase() == 'favorito' &&
-              favoritesProvider.isFavorite(pokemon.name)) {
-            matches = true;
-          } else if (pokemon.color.toLowerCase() == cat.toLowerCase()) {
-            matches = true;
-          } else if (pokemon.habitat?.toLowerCase() == cat.toLowerCase()) {
-            matches = true;
-          } else if (pokemon.shape?.toLowerCase() == cat.toLowerCase()) {
-            matches = true;
-          } else if (pokemon.eggGroups.any(
-            (egg) => egg.toLowerCase() == cat.toLowerCase(),
-          )) {
-            matches = true;
-          }
-
-          if (_filterMode == 'AND') {
-            matchesAll = matchesAll && matches;
-          } else {
-            if (matches) matchesCount++;
-          }
-        }
-
-        return _filterMode == 'AND'
-            ? matchesAll
-            : matchesCount > 0; // Retorna basado en modo.
-      }).toList(); // Lista filtrada.
-    }
-    if (_searchQuery.isNotEmpty) {
-      // Si hay texto
-      results = results.where((pokemon) {
-        // Filtra.
-        final pokemonId = int.parse(pokemon.url.split('/')[6]); // ID.
-        return pokemon.name.toLowerCase().contains(
-              _searchQuery,
-            ) || // Nombre contiene.
-            pokemonId.toString().contains(_searchQuery); // ID contiene.
-      }).toList(); // Lista.
-    }
-
-    setState(() {
-      // Actualiza.
-      _filteredPokemons.clear(); // Limpia.
-      _filteredPokemons.addAll(
-        hasFilters ? results : _allPokemons,
-      ); // Agrega filtered o all.
-      debugPrint(
-        'Pokémon filtrados: ${_filteredPokemons.length}',
-      ); // Print debug.
-    });
-
-    // Auto-carga si la lista filtrada es pequeña y hay más por cargar
-    final int currentLength = _filteredPokemons.length; // Longitud actual.
-    if (currentLength <
-            5 && // Si <5 esto porque para 5 o más aparece el scroll.
-        _hasMore &&
-        !_isLoading &&
-        !(_searchQuery
-                .isNotEmpty && // No si búsqueda específica y offset >= target.
-            _specificSearch &&
-            _offset >= (_targetSearchId ?? 0))) {
-      await _fetchPokemons(); // Auto fetch.
-    }
-  }
-
-  @override
-  void dispose() {
-    // Limpia.
-    _scrollController.dispose();
-    super.dispose();
-  }
+  // =====================================================================
+  // WIDGET BUILD
+  // =====================================================================
 
   @override
   Widget build(BuildContext context) {
@@ -462,57 +143,59 @@ class _SelectorPokemonScreenState extends State<SelectorPokemonScreen>
         actions: <Widget>[
           TextButton.icon(
             icon: Icon(
-              _seleccionPoke.length == 2 ? Icons.cancel : Icons.select_all,
+              _seleccionPoke.length == 2 ? Icons.select_all : Icons.error,
+              color: _seleccionPoke.length == 2 ? Colors.green : Colors.red,
             ),
             label: Text(
               _seleccionPoke.length == 2
                   ? 'A PokeComparar!'
-                  : 'Faltan Pokémon por seleccionar',
+                  : 'Faltan Pokémon por seleccionar (${2 - _seleccionPoke.length})',
               style: TextStyles.bodyText,
             ),
-            onPressed: () {
-              pokeElegido1 = _seleccionPoke.first;
-              pokeElegido2 = _seleccionPoke.last;
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ComparadorPokemonState(
-                    pokeElegido1: pokeElegido1,
-                    pokeElegido2: pokeElegido2,
-                  ),
-                ),
-              );
-            },
+            onPressed: _seleccionPoke.length == 2
+                ? () {
+                    pokeElegido1 = _seleccionPoke.first;
+                    pokeElegido2 = _seleccionPoke.last;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ComparadorPokemonState(
+                          pokeElegido1: pokeElegido1,
+                          pokeElegido2: pokeElegido2,
+                        ),
+                      ),
+                    );
+                  }
+                : null,
           ),
           IconButton(
-            // Botón home.
-            icon: const Icon(Icons.home), // Icono.
+            icon: const Icon(Icons.home),
             onPressed: () {
-              // Acción.
               Navigator.pushAndRemoveUntil(
-                // Navega a menu y remueve stack.
                 context,
                 MaterialPageRoute(builder: (context) => MenuPrincipal()),
                 (Route<dynamic> route) => false,
               );
             },
-            tooltip: 'Volver a Menú Principal', // Tooltip.
+            tooltip: 'Volver a Menú Principal',
           ),
-          SizedBox(width: 50),
+          const SizedBox(width: 50),
         ],
       ),
       body: Container(
         color: AppColors.fondoPokedex,
         child: Column(
           children: [
-            SearchBarWidget(onChanged: _filterBySearch),
-            CategoryFilterWidget(onFilterChanged: _onCategoriesChanged),
+            SearchBarWidget(onChanged: (q) => filterBySearch(q, context)),
+            CategoryFilterWidget(
+              onFilterChanged: (s, m) => onCategoriesChanged(s, m, context),
+            ),
             Expanded(
               child: PokemonCardList(
-                pokemons: _filteredPokemons,
-                scrollController: _scrollController,
-                isLoading: _isLoading,
-                hasMore: _hasMore,
+                pokemons: filteredPokemons,
+                scrollController: scrollController,
+                isLoading: isLoading,
+                hasMore: hasMore,
                 onSelected: _handlePokemonSelect,
                 isSelected: _isPokemonCurrentlySelected,
               ),

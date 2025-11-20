@@ -1,36 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:pokedex/data/pokemon.dart';
-import 'dart:isolate';
-
-// Clase para interactuar con PokeAPI.
-// Proporciona métodos para fetch listas, detalles, evoluciones, etc.
-// Funciona con http.Client y timeouts
-// Abstrae llamadas API, maneja en Isolates para batches.
-// Cómo funciona: fetchAllPokemonInIsolate usa Isolate para cargar batch con detalles.
-// fetchPokemonDetails agrega datos como types, generation, etc de species.
-
-// Errores: Throws exceptions en fallos, pero no tiene retry. Esto por si falla una llamada
-// Falta: caching (traté de usar caché pero me dió muchos errores y no encontraba el json creado).
-
-// Usa client reutilizable. _parseEvolutionChain recursivo para chain.
-// fetchWeaknesses suma debilidades de tipos. Descripción prioriza 'es', fallback 'en'. (aqui se podrían traducir los demás si se quiere, pero algunas traducciones afectarían la lógica)
-// Isolate evita bloqueo main en loops de fetch. Future.wait en details para paralelismo.
 
 class PokeApi {
   static const Duration _timeoutDuration = Duration(seconds: 30);
 
-  static Future<List<Pokemon>> fetchAllPokemonInIsolate({
-    // Fetch batch en Isolate.
+  static Future<List<Pokemon>> fetchBatchWithDetails({
     required int limit,
     required int offset,
-    required SendPort sendPort, // Port para resultado.
   }) async {
+    final url = Uri.parse(
+      'https://pokeapi.co/api/v2/pokemon?limit=$limit&offset=$offset',
+    );
+    final client = http.Client();
+
     try {
-      final url = Uri.parse(
-        'https://pokeapi.co/api/v2/pokemon?limit=$limit&offset=$offset',
-      );
-      final client = http.Client();
       final response = await client.get(url).timeout(_timeoutDuration);
 
       if (response.statusCode == 200) {
@@ -40,23 +24,20 @@ class PokeApi {
             .map((json) => Pokemon.fromJson(json)) // Mapea a basic.
             .toList();
 
-        // Obtener detalles de cada Pokémon
+        // Obtener detalles de cada Pokémon en paralelo (aquí ocurre el riesgo de fallo de Hypno)
         final detailedPokemons = await Future.wait(
           // Paraleliza details.
           basicPokemons.map((p) => fetchPokemonDetails(p, client)).toList(),
         );
 
-        sendPort.send(detailedPokemons); // Envía lista.
-        client.close(); // Cierra.
         return detailedPokemons;
       } else {
         throw Exception(
-          'Error al cargar lista de Pokémon: ${response.statusCode}',
+          'Error al cargar lista de Pokémon con detalles: ${response.statusCode}',
         );
       }
-    } catch (e) {
-      sendPort.send('Error: $e');
-      rethrow; // Rethrow.
+    } finally {
+      client.close(); // Asegura que el cliente se cierre
     }
   }
 
@@ -115,26 +96,6 @@ class PokeApi {
       shape: shape,
       eggGroups: eggGroups,
     );
-  }
-
-  static Future<Pokemon> fetchPokemonById(int id) async {
-    final url = Uri.parse('https://pokeapi.co/api/v2/pokemon/$id');
-    final client = http.Client();
-    final response = await client.get(url).timeout(_timeoutDuration);
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final basicPokemon = Pokemon.fromJson({
-        'name': data['name'],
-        'url': url.toString(),
-      });
-      final result = await fetchPokemonDetails(basicPokemon, client);
-      client.close(); // Cierra.
-      return result;
-    } else {
-      throw Exception(
-        'Error al cargar Pokémon por ID $id: ${response.statusCode}',
-      );
-    }
   }
 
   static Future<Pokemon?> fetchPokemonByName(String name) async {

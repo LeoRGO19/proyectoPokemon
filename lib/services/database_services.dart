@@ -3,6 +3,7 @@ import 'package:sqflite/sqlite_api.dart';
 import 'package:path/path.dart';
 import 'package:pokedex/data/pokemon.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'dart:math';
 //Base de datos que almacena todos los pokemon que se piden a la pokeapi al ejecutar la pokedex por primera vez
 //Esto permite que después de su primera ejecución los pokémon cargen de forma casi intantánea
 
@@ -105,9 +106,135 @@ class DatabaseService {
     return actualCount;
   }
 
+  Future<void> loadInitialData(
+    Future<List<Pokemon>> Function(int offset, int limit) fetcher,
+  ) async {
+    // Solo se ejecuta si la DB está incompleta
+    if (await checkData() < 1025) {
+      print('Iniciando carga COMPLETA de 1025 Pokémon en batches de 50...');
+      const totalPokemon = 1025;
+      const batchSize = 50;
+      int savedCount = await checkData(); // Revisa cuántos ya están guardados
+      int offset =
+          (savedCount ~/ batchSize) *
+          batchSize; // Calcula el offset para reanudar desde el último batch completo
+
+      try {
+        if (offset > 0) {
+          print('Reanudando carga desde el offset: $offset');
+        }
+
+        while (offset < totalPokemon) {
+          int limit = min(batchSize, totalPokemon - offset);
+          if (limit <= 0) break;
+
+          // 1. Obtener batch de Pokémon CON DETALLES, con reintentos
+          List<Pokemon> batch = [];
+          int fetchRetries = 0;
+          bool fetchSuccess = false;
+          while (!fetchSuccess && fetchRetries < 4) {
+            try {
+              batch = await fetcher(offset, limit);
+              fetchSuccess = true;
+            } catch (e) {
+              fetchRetries++;
+              print(
+                'Error al obtener batch en offset $offset (intento $fetchRetries): $e',
+              );
+              if (fetchRetries >= 4) {
+                print(
+                  'Se omitió definitivamente el batch en offset $offset tras 4 intentos fallidos.',
+                );
+                break;
+              } else {
+                await Future.delayed(Duration(milliseconds: 800));
+              }
+            }
+          }
+          if (!fetchSuccess) {
+            offset += limit;
+            continue;
+          }
+
+          // 2. Guardar batch en la DB, con reintentos por cada Pokémon
+          for (var pok in batch) {
+            int retries = 0;
+            bool success = false;
+            while (!success && retries < 4) {
+              try {
+                addPokemon([pok]);
+                success = true;
+              } catch (e) {
+                retries++;
+                print('Error al guardar ${pok.name} (intento $retries): $e');
+                if (retries >= 4) {
+                  print(
+                    'Se omitió definitivamente a ${pok.name} tras 4 intentos fallidos.',
+                  );
+                } else {
+                  await Future.delayed(Duration(milliseconds: 500));
+                }
+              }
+            }
+          }
+
+          offset += limit;
+          savedCount = await checkData(); // Actualiza el conteo real
+          print(
+            'Guardados $savedCount de $totalPokemon Pokémon en DB. Último: batch.isNotEmpty ? batch.last.name : "(ninguno)"}',
+          );
+        }
+        print('Carga inicial completa y guardada en la base de datos.');
+
+        // Si no se llegó a 1025, reintentar en segundo plano
+        int finalCount = await checkData();
+        if (finalCount < 1025) {
+          print(
+            'Faltan ${1025 - finalCount} Pokémon. Iniciando reintentos automáticos en segundo plano...',
+          );
+          Future(() async {
+            int retry = 0;
+            const int maxRetries = 30; // Por ejemplo, 30 intentos
+            while (retry < maxRetries) {
+              await Future.delayed(
+                Duration(seconds: 30),
+              ); // Espera 30 segundos entre intentos
+              int count = await checkData();
+              if (count >= 1025) {
+                print('¡Base de datos completada en reintentos automáticos!');
+                break;
+              }
+              print(
+                'Reintento automático #${retry + 1}: Faltan ${1025 - count} Pokémon.',
+              );
+              await loadInitialData(fetcher); // Reintenta cargar los faltantes
+              retry++;
+            }
+            if (await checkData() < 1025) {
+              print(
+                'No se logró completar la base de datos tras $maxRetries reintentos automáticos.',
+              );
+            }
+          });
+        }
+      } catch (e) {
+        print('Error grave durante la carga inicial de Pokémon: $e');
+        // No rethrow para no bloquear el inicio de la app.
+      }
+    } else {
+      print('Base de datos completa (1025 Pokémon). No se requiere carga.');
+    }
+  }
+
   Future<void> clearTable(String tableName) async {
     final db = await database;
     await db.delete(tableName);
     print("Base de datos borrada");
+  }
+
+  Future<void> clearAllPokemon() async {
+    final db = await database;
+    await db.delete(_pokemonTableName);
+    print("Base de datos de Pokémon borrada");
   }
 }

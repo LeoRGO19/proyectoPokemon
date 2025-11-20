@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:pokedex/core/text_styles.dart';
 import 'package:pokedex/screens/imc_pokedex_screen.dart';
 import 'package:pokedex/screens/team_screens/team_manager.dart';
+import 'package:pokedex/services/database_services.dart';
 import 'package:pokedex/screens/selector_pokemon_screen.dart';
+import 'package:pokedex/services/database_services.dart';
 
 class MenuPrincipal extends StatefulWidget {
   const MenuPrincipal({super.key});
@@ -12,6 +14,14 @@ class MenuPrincipal extends StatefulWidget {
 }
 
 class _MenuPrincipalState extends State<MenuPrincipal> {
+  Future<void> _borrarBaseDeDatos() async {
+    await DatabaseService.instance.clearAllPokemon();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Base de datos de Pokémon borrada')));
+    setState(() {}); // Para refrescar si es necesario
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,6 +73,16 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
                 child: Text(
                   "Organizador de equipos",
                   style: TextStyles.menuText,
+                ),
+              ),
+
+              SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: _borrarBaseDeDatos,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: Text(
+                  "Borrar base de datos",
+                  style: TextStyles.menuText.copyWith(color: Colors.white),
                 ),
               ),
 
